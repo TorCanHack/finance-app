@@ -3,6 +3,7 @@ import { useState } from "react"
 import { fetchRecords } from "./api/Api"
 import { useEffect } from "react"
 import Home from "./pages/Home"
+import Navigation from "./components/Navigation"
 
 function App() {
 
@@ -26,11 +27,16 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
+      <main>
+        <Routes>
         
           <Route path="/" element={<Home data={data}/>}/>
 
-      </Routes>
+        </Routes>
+        <Navigation/>
+
+      </main>
+      
       
     </BrowserRouter>
     
