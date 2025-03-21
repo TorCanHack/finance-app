@@ -22,7 +22,7 @@ const Home = ({data}) => {
     
 
     return (
-        <section className="bg-[#F8f4f0]">
+        <section className="bg-[#F8f4f0] lg:w-full ">
             {isLoading? 
             <div>
                     <p>Loading...</p>
@@ -30,28 +30,29 @@ const Home = ({data}) => {
             
             :
             
-            <div className="p-4 md:px-10 ">
-                    <h1 className="text-3xl font-bold leading-8 mb-6">Overview</h1>
+            <div className="p-4 md:px-10 lg:grid lg:grid-cols-2 lg:gap-y-1  lg:gap-x-48 lg:content-between ">
+                    <h1 className="text-3xl font-bold leading-8 mb-6 lg:col-span-2">Overview</h1>
 
-                    <article className="md:flex md:flex-row  md:justify-between">
-                        <div className="h-28 bg-black text-white rounded-2xl p-4 px-6 mb-3 ">
+                    <article className="md:flex md:flex-row  md:justify-between lg:col-span-2 ">
+                        <div className="h-28 bg-black text-white rounded-2xl p-4 px-6 mb-3 lg:w-[337px] ">
                             <h2 className="text-sm mb-4">Current Balance</h2>
                             <p className="text-3xl font-bold leading-8 ">${data.balance?.current.toLocaleString(undefined, ({minimumFractionDigits: 2, maximumFractionDigits: 2}))}</p>
                         </div>
 
-                        <div className="bg-white h-28 rounded-2xl p-4 px-6 mb-3">
+                        <div className="bg-white h-28 rounded-2xl p-4 px-6 mb-3 lg:w-[337px]">
                             <h2 className="text-sm mb-4">Income </h2>
                             <p className="text-3xl font-bold leading-8 ">${data.balance?.income.toLocaleString(undefined, ({minimumFractionDigits: 2, maximumFractionDigits: 2}))}</p>
                         </div>
 
-                        <div className="bg-white h-28 rounded-2xl p-4 px-6 mb-3">
+                        <div className="bg-white h-28 rounded-2xl p-4 px-6 mb-3 lg:w-[337px]">
                             <h2 className="text-sm mb-4">Expenses</h2>
                             <p className="text-3xl font-bold leading-8 ">${data.balance?.expenses.toLocaleString(undefined, ({minimumFractionDigits: 2, maximumFractionDigits: 2}))}</p>
 
                         </div>
                     </article>
 
-                    <article className="bg-white p-4 px-6 md:mb-7">
+                    <article className="bg-white p-4 px-6 md:mb-7 lg:col-span-1 lg:w-[600px]  ">
+
                         <div className="flex flex-row justify-between w-full md:mb-7">
                             <h2 className="text-xl font-bold">Pots</h2>
                             <button className="text-sm text-gray-500">See Details</button>
@@ -59,7 +60,7 @@ const Home = ({data}) => {
                         </div>
 
                         <div className="md:flex md:flex-row md:justify-between">
-                            <div className="flex flex-row items-center bg-[#F8f4f0] p-5 rounded-2xl my-4 md:w-60 ">
+                            <div className="flex flex-row items-center bg-[#F8f4f0] p-5 rounded-2xl my-4 md:w-60  ">
                                 <img 
                                     src={potIcon} 
                                     alt="potIcon"
@@ -73,7 +74,7 @@ const Home = ({data}) => {
 
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-3 md:w-[357px]">
+                            <div className="grid grid-cols-2 gap-3 md:w-[357px] lg:w-[277px]">
                             
                                 {data.pots?.map((potItem, index) => (
                                     <div key={index} className="flex flex-row">
@@ -90,7 +91,7 @@ const Home = ({data}) => {
                         </div>
                     </article>
 
-                    <article className="bg-white p-4 px-6 mb-4">
+                    <article className="bg-white p-4 px-6 mb-4 lg:col-span-1 lg:row-span-2 lg:w-[600px] lg:order-5 lg:mb-0">
                         <div className="flex flex-row justify-between w-full">
                             <h2 className="text-xl font-bold">Transactions </h2>
                             <button className="text-sm text-gray-500">See Details</button>
@@ -119,7 +120,7 @@ const Home = ({data}) => {
 
                     </article>
 
-                    <article className="bg-white p-4 md:px-7">
+                    <article className="bg-white p-4 md:px-7 lg:col-span-1 lg:row-span-2 lg:order-4 lg:w-[428px] lg:h-[410px]">
                         <div className="flex flex-row justify-between w-full md:mb-7">
                             <h2 className="text-xl font-bold">Budgets </h2>
                             <button className="text-sm text-gray-500">See Details</button>
@@ -127,7 +128,7 @@ const Home = ({data}) => {
                         </div>
                         
                         <div className="md:flex  md:flex-row md:justify-between ">
-                            <div className="flex flex-col items-center justify-center ">
+                            <div className="flex flex-col items-center justify-center lg:w-60 ">
                                 <PieChart width={400} height={300}>
                                     <Pie 
                                         data={pieData}
@@ -165,7 +166,7 @@ const Home = ({data}) => {
 
                     </article>
 
-                    <article className="bg-white px-3 py-4 mt-5 rounded-xl">
+                    <article className="bg-white px-3 py-4 mt-5 rounded-xl lg:col-span-1 lg:row-span-2 lg:order-6 lg:-mt-10 lg:h-[327px] ">
                         <div className="flex flex-row justify-between w-full mb-5">
                             <h2 className="text-xl font-bold">Recurring Bills</h2>
                             <button className="text-sm text-gray-500">See Details</button>
@@ -177,7 +178,7 @@ const Home = ({data}) => {
 
                             acc[tx.category] += tx.amount;
                             return acc;
-                        }, {})).map(([category, totalAmount], index) =>(
+                        }, {})).slice(0, 3).map(([category, totalAmount], index) =>(
                             <div key={index} className="">
                                 <div className="flex flex-row items-center h-15 mb-5">
                                     <div className={`${Math.abs(totalAmount) > 150 ? 'bg-amber-400': Math.abs(totalAmount) > 100 ? 'bg-blue-800': Math.abs(totalAmount) > 50 ? 'bg-cyan-400' : 'bg-amber-800'} w-3 h-full rounded-l-xl `}></div>
