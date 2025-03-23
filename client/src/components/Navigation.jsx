@@ -34,7 +34,7 @@ const Navigation = () => {
                 )}
                 
             </NavLink>
-            <NavLink><img src={nav_transaction} alt="navigation to transaction icon" /></NavLink>
+            <NavLink to="/transactions"><img src={nav_transaction} alt="navigation to transaction icon" /></NavLink>
             <NavLink><img src={nav_budget} alt="navigation to budget icon" /></NavLink>
             <NavLink><img src={nav_pots} alt="navigation to pots icon" /></NavLink>
             <NavLink><img src={nav_recurring} alt="navigation to recurring bills icon" /></NavLink>

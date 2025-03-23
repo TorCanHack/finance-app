@@ -4,6 +4,7 @@ import { fetchRecords } from "./api/Api"
 import { useEffect } from "react"
 import Home from "./pages/Home"
 import Navigation from "./components/Navigation"
+import Transactions from "./pages/Transactions"
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
         <Routes>
         
           <Route path="/" element={<Home data={data}/>}/>
+          <Route path="/transactions" element={<Transactions data={data}/>}/>
 
         </Routes>
         <Navigation/>
