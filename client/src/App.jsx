@@ -5,11 +5,23 @@ import { useEffect } from "react"
 import Home from "./pages/Home"
 import Navigation from "./components/Navigation"
 import Transactions from "./pages/Transactions"
+import Budget from "./pages/Budget"
 
 function App() {
 
   const [data, setData] = useState({})
   const [error, setError] = useState("")
+  const theme = {
+    Green: '#277C78',
+    Cyan: '#82C9D7',
+    Peach: '#F2CDAC',
+    Purple: '#626070',
+    Voilet: '#826CB0',
+    Orange: '#FFA500',
+    Blue: '#0000FF',
+    Pink: '#FFC0CB',
+    Indigo: '#4B0082'
+  }
 
   useEffect(() => {
     const getRecord = async () => {
@@ -33,6 +45,7 @@ function App() {
         
           <Route path="/" element={<Home data={data}/>}/>
           <Route path="/transactions" element={<Transactions data={data}/>}/>
+          <Route path="/budget" element={<Budget data={data} theme={theme}/>}/>
 
         </Routes>
         <Navigation/>

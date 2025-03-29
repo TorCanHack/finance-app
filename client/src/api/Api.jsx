@@ -17,3 +17,13 @@ export const fetchRecords = async () => {
         throw error
     }
 }
+
+export const addNewRecords = async (data) => {
+    try {
+        const response = await api.post('/records', data)
+        return response.data
+    } catch(error) {
+        console.error("error creating new record", error)
+        throw error
+    }
+}
