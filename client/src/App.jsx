@@ -40,7 +40,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <main className="lg:flex lg:flex-row-reverse lg:justify-between lg:h-full lg:min-h-screen">
+      <main className="lg:flex lg:flex-row-reverse lg:justify-between lg:h-full lg:min-h-screen overflow-hidden">
         <Routes>
         
           <Route path="/" element={<Home data={data}/>}/>

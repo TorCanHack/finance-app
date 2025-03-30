@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { PieChart, Pie, Cell, Tooltip, Legend} from "recharts"
+
 import potIcon from '../assets/images/icon-pot.svg'
+import DonutChart from "../components/DonutChart";
 
 const Home = ({data}) => {
 
@@ -10,13 +11,6 @@ const Home = ({data}) => {
         setIsLoading(!data);
     }, [data]);
 
-
-    const pieData = data.budgets? data.budgets.map(budget => ({
-        name: budget.category,
-        value: budget.maximum
-    })) : [];
-
-    const pieColors = data.budgets? data.budgets.map(color => color.theme) : [];
 
     const totalSaved = data.pots? data.pots.reduce((sum, pot) => sum + pot.total, 0) : 0;
     
@@ -128,27 +122,9 @@ const Home = ({data}) => {
                         </div>
                         
                         <div className="md:flex  md:flex-row md:justify-between ">
-                            <div className="flex flex-col items-center justify-center lg:w-60 ">
-                                <PieChart width={400} height={300}>
-                                    <Pie 
-                                        data={pieData}
-                                        dataKey="value"
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={120}
-                                        fill="blue"
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell 
-                                                key={`cell-${index}`} 
-                                                fill={pieColors[index % pieColors.length]}
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip/>
-                                </PieChart>
-                            </div>
+
+                            <DonutChart data={data}/>
+                            
 
                             <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
                                 {data.budgets?.map((budget, index) => (

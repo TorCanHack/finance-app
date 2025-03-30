@@ -195,10 +195,10 @@ const Transactions = ({data}) => {
 
 
     return (
-        <section className="bg-[#F8f4f0] min-h-screen p-5 md:p-10 lg:w-full lg:px-16 lg:pb-0  ">
+        <section className="bg-[#F8f4f0] min-h-screen w-full p-5 overflow-hidden md:p-10 lg:w-full lg:px-16 lg:pb-0  ">
             <h1 className="font-bold  text-[32px] md:mb-7">Transactions</h1>
             <article className='bg-white p-4 lg:px-8 rounded-xl'>
-                <div className='flex flex-row items-center justify-between ' >
+                <div className='flex flex-row items-center justify-between' >
                     <div className=' md:pt-3'>
                         <input 
                             className='border border-gray-600 rounded-md h-11 p-2  md:placeholder:truncate md:text-ellipsis md:w-40  md:px-8 lg:w-80' 
@@ -212,7 +212,7 @@ const Transactions = ({data}) => {
 
                     <div className='lg:ml-40'>
                       <div>
-                            <button onClick={handleSortButton} className='md:flex md:flex-row md:items-center md:justify-between w-44'>
+                            <button onClick={handleSortButton} className='md:flex md:flex-row md:items-center md:justify-between md:w-44 '>
                                 <img src={icon_sort} alt="sort icon" className='md:hidden'/>
                                 <label className='hidden md:flex'>Sort by</label>
                                 <div className=' hidden md:flex md:flex-row md:items-center md:justify-between border border-gray-500 w-28 md:px-3 md:py-2 md:rounded-xl'>
@@ -230,13 +230,11 @@ const Transactions = ({data}) => {
                             </ul>
                       </div>
 
-                      
-
                     </div>
 
                     <div>
-                        <button onClick={handleFilterMenu} className='md:flex md:flex-row md:items-center  md:w-60'>
-                            <img src={icon_filter} alt="filter icon"  className='md:hidden'/>
+                        <button onClick={handleFilterMenu} className=' md:flex md:flex-row md:items-center  md:w-60'>
+                            <img src={icon_filter} alt="filter icon"  className='flex md:hidden'/>
                             <label className='hidden md:flex md:mr-2'>Category</label>
                             <div className='hidden md:flex md:flex-row md:justify-between md:items-center border border-gray-500 w-full md:px-3 md:py-2 md:rounded-xl'>
                                 {activeCategory === "" ? <p className='text-sm'>All Transactions</p> : <p className='text-sm'>{activeCategory}</p>}
