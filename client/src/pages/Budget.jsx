@@ -123,7 +123,7 @@ const Budget = ({data}) => {
                 </div>
             </article>
 
-            <article className="bg-white">
+            <article className="bg-white p-4">
                 {transactions.map(tx => {
                     const matchingBudget = budgets.find(budget => budget.category === tx.category)
                     return {
@@ -137,13 +137,54 @@ const Budget = ({data}) => {
                     tx.budgetcategory &&
                     index === self.findIndex(t => t.budgetcategory === tx.budgetcategory)
                 )
+                .map(tx => {
+                    const totalSpent = transactions
+                        .filter( t => t.category === tx.budgetcategory)
+                        .reduce((sum, t) => sum + t.amount, 0)
+
+                    const spendingPercentage = tx.maximum ? Math.min((Math.abs(totalSpent)/tx.maximum) * 100, 100) : 0;
+                    const freeCash = tx.maximum - Math.abs(totalSpent) 
+                    const freeAmount = freeCash > 0 ? freeCash : 0
+                    
+
+                    return {
+                        ...tx,
+                        totalSpent: totalSpent ? totalSpent : null,
+                        spendingPercentage: spendingPercentage ? spendingPercentage : null,
+                        freeAmount: freeAmount
+                    }
+
+                })
                 .map((tx, index) => (
-                    <div key={index}>
-                        <div>
+
+                    
+                    <div key={index} className="mb-4">
+                        <div className="flex flex-row">
                             <div style={{backgroundColor: tx.theme}} className="w-4 h-4 rounded-full mr-4"></div>
                             <h2 className="text-xl font-bold">{tx.budgetcategory}</h2>
                         </div>
-                        <p>Maximum of ${tx.maximum}</p>
+                        <p>Maximum of ${tx.maximum} </p>
+                        <div>
+                            <div style={{ backgroundColor: tx.theme, width: `${tx.spendingPercentage}%`}} className="h-4">
+                                
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex flex-row" >
+
+                                <div className="border-l-4 border-amber-500 w-36">
+                                    <h3>Spent</h3>
+                                    <p>{Math.abs(tx.totalSpent).toFixed(0)}</p>
+                                </div>
+
+                            
+                                <div>
+                                    <h3>Free</h3>
+                                    <p>{tx.freeAmount}</p>
+                                </div>
+                            </div>
+                            
+                        </div>
 
                     </div>
                     
