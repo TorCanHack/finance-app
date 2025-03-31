@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ThemeDropDown from "../components/ThemeDropDown";
 import icon_close from '../assets/images/icon-close-modal.svg'
 import DonutChart from "../components/DonutChart";
 
 const Budget = ({data}) => {
 
-    const [budgets, setBudgets] = useState(data.budgets)
+    const transactions = data.transactions || []
+    const [budgets, setBudgets] = useState([])
+
+    useEffect(() => {
+        if (data.budgets){
+            setBudgets([...data.budgets])
+        }
+    }, [data])
     const [showAddBudgets, setShowAddBudgets] = useState(false)
     const categories = [...new Set(data.transactions?.map(items => items.category))].sort()
-    console.log(categories)
+    const budgetCategories = budgets.map(tx => tx.category)
+
+    console.log(budgetCategories)
 
     const handleShowAddBudget = () => {
         setShowAddBudgets(!showAddBudgets)
@@ -38,15 +47,38 @@ const Budget = ({data}) => {
         const totalSpent = filteredLatestTransaction.reduce((sum, transaction) => 
             sum + Math.abs(transaction.amount), 0)
 
-        return [
+        return {
             category, totalSpent
-        ]
+        }
 
         
     }
 
+    //example usage
+    const displayLatestMonthSpending = (transactions, categories) => {
+
+        //if no specific category is provided, get all the unique categories from the data
+        if (!categories || categories.length === 0){
+            categories = [...new Set(transactions.map(t => t.category))];
+        } 
+
+        //calculate spending for each category
+        const results = categories.map(category => 
+            calculateLatestMonthCategorySpending(transactions, category)
+        );
+
+        //display the results
+        results.forEach(result => {
+            console.log(`${result.category}: $${result.totalSpent.toFixed(2)}`)
+        })
+
+        return results
+    }
+
+    const budgetsSpending = displayLatestMonthSpending(transactions, budgetCategories); 
+
     return (
-        <section className="flex flex-col items-center min-h-screen p-4 bg-[#F8f4f0]">
+        <section className=" min-h-screen p-4 bg-[#F8f4f0]">
             <div className="flex flex-row justify-between  w-full">
                 <h1 className="font-bold text-[32px]">Budgets</h1>
 
@@ -58,21 +90,64 @@ const Budget = ({data}) => {
                 </button>
             </div>
 
-            <article className="flex flex-col items-center w-full bg-white py-4">
+            <article className="flex flex-col items-center w-full bg-white py-4 mb-8">
                 <DonutChart data={data}/>
                 <div className="flex flex-col   w-full ">
                     <h2 className="text-xl font-bold">Spending summary</h2>
-                    {data.budgets?.map((budget, index) => (
-                        <div key={index} className="flex flex-row items-center  border  w-full">
+                    {budgets.map( budget => {
+                        //find matching spending data
+                        const spending = budgetsSpending.find(result => result.category === budget.category);
+                        return {
+                            ...budget,
+                            totalSpent: spending? spending.totalSpent : 0
+                        };
+                    })
+                    .sort((a,b) => b.totalSpent - a.totalSpent) //sort by total spent decending
+                    .map((budget, index) => (
+                        <div key={index} className="flex flex-row items-center border w-full">
                             <div style={{ backgroundColor: budget.theme}} className="h-11 w-1 mr-3"></div>
-                                <div className="flex flex-row">
-                                    <p>{budget.category}</p>
-                                    <p>${budget.maximum.toLocaleString(undefined, ({minimumFractionDigits: 2, maximumFractionDigits: 2}))}</p>
+                            <div className="flex flex-row justify-between w-full">
+                                <p className="w-48">{budget.category}</p>
+                                <div className="flex flex-row text-right">
+                                    <p>${budget.totalSpent}</p>
+                                    <p>of ${budget.maximum.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2, 
+                                        maximumFractionDigits: 2
+                                    })}</p>
                                 </div>
-
                             </div>
+                        </div>
+
                     ))}
+                   
                 </div>
+            </article>
+
+            <article className="bg-white">
+                {transactions.map(tx => {
+                    const matchingBudget = budgets.find(budget => budget.category === tx.category)
+                    return {
+                        ...tx,
+                        budgetcategory: matchingBudget? matchingBudget.category: null,
+                        maximum: matchingBudget ? matchingBudget.maximum : null,
+                        theme: matchingBudget ? matchingBudget.theme : null
+                    }
+                })
+                .filter((tx, index, self) => 
+                    tx.budgetcategory &&
+                    index === self.findIndex(t => t.budgetcategory === tx.budgetcategory)
+                )
+                .map((tx, index) => (
+                    <div key={index}>
+                        <div>
+                            <div style={{backgroundColor: tx.theme}} className="w-4 h-4 rounded-full mr-4"></div>
+                            <h2 className="text-xl font-bold">{tx.budgetcategory}</h2>
+                        </div>
+                        <p>Maximum of ${tx.maximum}</p>
+
+                    </div>
+                    
+                ))}
             </article>
 
             <div className={`w-80 p-4 ${showAddBudgets ? "flex flex-col" : "hidden"}`}>
