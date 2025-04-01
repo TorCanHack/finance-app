@@ -164,7 +164,7 @@ const Budget = ({data}) => {
                             <h2 className="text-xl font-bold">{tx.budgetcategory}</h2>
                         </div>
                         <p>Maximum of ${tx.maximum} </p>
-                        <div>
+                        <div className="my-4 bg-[#F8f4f0] p-1.5 rounded-md">
                             <div style={{ backgroundColor: tx.theme, width: `${tx.spendingPercentage}%`}} className="h-4">
                                 
                             </div>
@@ -172,18 +172,42 @@ const Budget = ({data}) => {
                         <div>
                             <div className="flex flex-row" >
 
-                                <div className="border-l-4 border-amber-500 w-36">
+                                <div className="border-l-4  w-36 rounded-xs px-4" style={{borderColor: tx.theme}}>
                                     <h3>Spent</h3>
-                                    <p>{Math.abs(tx.totalSpent).toFixed(0)}</p>
+                                    <p>${Math.abs(tx.totalSpent).toFixed(0)}</p>
                                 </div>
 
                             
-                                <div>
+                                <div className="border-l-4 w-36 rounded-xs border-[#F8f4f0] px-2">
                                     <h3>Free</h3>
-                                    <p>{tx.freeAmount}</p>
+                                    <p>${tx.freeAmount.toFixed(0)}</p>
                                 </div>
                             </div>
                             
+                        </div>
+
+                        <div className="bg-[#F8f4f0]">
+                            <div className="flex flex-row justify-between">
+                                <h3>Latest Spending</h3>
+
+                                <button>See all</button>
+                            </div>
+                            <div className="space-y-3">
+                                {transactions
+                                .filter(t => t.category === tx.budgetcategory)
+                                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                .slice(0, 3) // Get the 3 most recent transactions for this category
+                                .map((transaction, idx) => (
+                                    <div key={idx} className="flex justify-between border-b pb-2">
+                                    <p className="font-medium">{transaction.name}</p>
+                                    <div className="text-right">
+                                        <p className="font-medium">${Math.abs(transaction.amount).toFixed(2)}</p>
+                                        <p className="text-sm text-gray-500">{transaction.date}</p>
+                                    </div>
+                                    </div>
+                                ))}
+                            </div>
+
                         </div>
 
                     </div>
