@@ -199,11 +199,11 @@ const Budget = ({data}) => {
                                 .slice(0, 3) // Get the 3 most recent transactions for this category
                                 .map((transaction, idx) => (
                                     <div key={idx} className="flex justify-between border-b pb-2">
-                                    <p className="font-medium">{transaction.name}</p>
-                                    <div className="text-right">
-                                        <p className="font-medium">${Math.abs(transaction.amount).toFixed(2)}</p>
-                                        <p className="text-sm text-gray-500">{transaction.date}</p>
-                                    </div>
+                                        <p className="font-medium">{transaction.name}</p>
+                                        <div className="text-right">
+                                            <p className="font-medium">${Math.abs(transaction.amount).toFixed(2)}</p>
+                                            <p className="text-sm text-gray-500">{new Date(transaction.date)}</p> //error
+                                        </div>
                                     </div>
                                 ))}
                             </div>
