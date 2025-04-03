@@ -16,12 +16,20 @@ const Budget = ({data}) => {
     const [showAddBudgets, setShowAddBudgets] = useState(false)
     const categories = [...new Set(data.transactions?.map(items => items.category))].sort()
     const budgetCategories = budgets.map(tx => tx.category)
+    const [maximumSpending, setMaximumSpending] = useState("")
+
+    
 
     console.log(budgetCategories)
 
     const handleShowAddBudget = () => {
         setShowAddBudgets(!showAddBudgets)
     }
+
+    const totalbudgetSpend = transactions.filter(tx => budgets.some(budget => budget.category === tx.category)).reduce((sum, tx) => sum + tx.amount, 0)
+    
+    const budgetLimit = budgets.reduce((sum, budget) => sum + budget.maximum, 0)
+    console.log("sum of ",budgetLimit)
 
     const calculateLatestMonthCategorySpending = (transactions, category) => {
 
@@ -78,22 +86,27 @@ const Budget = ({data}) => {
     const budgetsSpending = displayLatestMonthSpending(transactions, budgetCategories); 
 
     return (
-        <section className=" min-h-screen p-4 bg-[#F8f4f0]">
+        <section className=" min-h-screen p-4 bg-[#F8f4f0] overflow-hidden">
             <div className="flex flex-row justify-between  w-full">
                 <h1 className="font-bold text-[32px]">Budgets</h1>
 
                 <button 
-                    className=" text-sm text-white border border-gray-400 bg-gray-900 cursor-pointer rounded-xl py-2 px-4" 
+                    className=" text-sm text-white border border-gray-400 bg-gray-900 cursor-pointer rounded-xl py-2 px-4 mb-6" 
                     onClick={handleShowAddBudget}
                 > 
                     + Add New Budget
                 </button>
             </div>
 
-            <article className="flex flex-col items-center w-full bg-white py-4 mb-8">
+            <article className="flex flex-col items-center w-full bg-white py-4 mb-8 rounded-2xl px-2">
                 <DonutChart data={data}/>
-                <div className="flex flex-col   w-full ">
-                    <h2 className="text-xl font-bold">Spending summary</h2>
+                <div className="flex flex-col items-center  relative bottom-44">
+                    <p className="text-[32px] font-bold">${Math.abs(totalbudgetSpend).toFixed(0)}</p>
+                    <p className="text-xs">of ${budgetLimit} limit</p>
+                    
+                </div>
+                <div className="flex flex-col   w-full -mt-16">
+                    <h2 className="text-xl font-bold mb-4 px-2">Spending summary</h2>
                     {budgets.map( budget => {
                         //find matching spending data
                         const spending = budgetsSpending.find(result => result.category === budget.category);
@@ -104,13 +117,13 @@ const Budget = ({data}) => {
                     })
                     .sort((a,b) => b.totalSpent - a.totalSpent) //sort by total spent decending
                     .map((budget, index) => (
-                        <div key={index} className="flex flex-row items-center border w-full">
-                            <div style={{ backgroundColor: budget.theme}} className="h-11 w-1 mr-3"></div>
-                            <div className="flex flex-row justify-between w-full">
-                                <p className="w-48">{budget.category}</p>
-                                <div className="flex flex-row text-right">
-                                    <p>${budget.totalSpent}</p>
-                                    <p>of ${budget.maximum.toLocaleString(undefined, {
+                        <div key={index} className="flex flex-row items-center w-full p-3 border-b border-gray-300">
+                            <div style={{ backgroundColor: budget.theme}} className="h-5 rounded-full w-1 mr-3"></div>
+                            <div className="flex flex-row items-center justify-between w-full">
+                                <p className="w-44">{budget.category}</p>
+                                <div className="flex flex-row items-center text-right">
+                                    <p className="font-bold">${budget.totalSpent}</p>
+                                    <p className="text-xs ml-2">of ${budget.maximum.toLocaleString(undefined, {
                                         minimumFractionDigits: 2, 
                                         maximumFractionDigits: 2
                                     })}</p>
@@ -202,7 +215,11 @@ const Budget = ({data}) => {
                                         <p className="font-medium">{transaction.name}</p>
                                         <div className="text-right">
                                             <p className="font-medium">${Math.abs(transaction.amount).toFixed(2)}</p>
-                                            <p className="text-sm text-gray-500">{new Date(transaction.date)}</p> //error
+                                            <p className="text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: '2-digit',
+                                            })}</p> 
                                         </div>
                                     </div>
                                 ))}
@@ -215,29 +232,45 @@ const Budget = ({data}) => {
                 ))}
             </article>
 
-            <div className={`w-80 p-4 ${showAddBudgets ? "flex flex-col" : "hidden"}`}>
+            <div className={`w-80 p-4 ${showAddBudgets ? " absolute bottom-40 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
                 <div className="flex flex-row items-center justify-between my-4">
                     <h2 className="text-xl font-bold">Add New Budget</h2>
                     <img src={icon_close} alt="icon close" onClick={handleShowAddBudget}/>
                 </div>
-                <p className="text-gray-500 text-sm">Choose a category to set a spending budget. These categories can help you monitor spending</p>
+                <p className="text-gray-500 text-sm mb-4">Choose a category to set a spending budget. These categories can help you monitor spending</p>
 
-                <label className="flex flex-col">
+                <label className="flex flex-col mb-4">
                     <span>Budget Category</span>
-                    <select className="border border-black w-full py-2 px-4 rounded-md">
+                    <select className="border border-black w-full py-2 px-4 rounded-md bg-white">
                         {categories.map((category, index) => (
                             
-                            <option key={index} value={category}>{category}</option>
+                            <option 
+                                key={index} 
+                                value={category}
+                                
+                            >
+                                {category}
+                            </option>
                         ))}
                     </select>
                 </label>
 
                 <label>
                     <span>Maximum Spending</span>
-                    <input type="text" placeholder="$  e.g. 2000" className="px-4"/>
+                    <input 
+                        type="text" 
+                        placeholder="$  e.g. 2000" 
+                        className="px-4 border border-black w-full py-2 rounded-md mb-4" 
+                        value={maximumSpending} 
+                        onChange={(e) =>  {
+                        const rawtext = e.target.value.replace(/\$/g, "")
+                        setMaximumSpending("$" + rawtext)}}
+                        
+                    />
                 </label>
 
                 <ThemeDropDown data={data}/>
+                <button className="bg-gray-900 text-white w-full mt-4 p-3 rounded-xl">Add Budget</button>
                 
             </div>
         </section>

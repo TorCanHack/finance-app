@@ -18,6 +18,7 @@ const ThemeDropDown = ({data}) => {
     }
 
     const [currentTheme, setCurrentTheme] = useState({name: "Green", hex: "#277C78"})
+    const budgets = data.budgets || [];
 
     const handleShowTheme = () => {
         setShowTheme(!showTheme)
@@ -34,12 +35,13 @@ const ThemeDropDown = ({data}) => {
                         <div className='flex flex-row items-center'>
                             <div style={{ backgroundColor: currentTheme.hex}} className='h-4 w-4 rounded-full mr-3'></div>
                             <span>{currentTheme.name}</span>
+                            
                         </div>
                         <img src={icon_down} alt="" />
 
                     </button>
                </div>
-                <ul className={` ${showTheme ? "flex  flex-col px-4" : "hidden"}`} >
+                <ul className={` ${showTheme ? "flex  flex-col bg-white px-4 cursor-pointer" : "hidden"}`} >
                     {Object.entries(theme).map(([colorName, hexCode]) => (
                         <li key={colorName} className='flex flex-row items-center border-b border-gray-300 py-2 text-sm' onClick={() => {
                             setCurrentTheme({name: colorName, hex: hexCode});
@@ -49,6 +51,7 @@ const ThemeDropDown = ({data}) => {
                            
                             <div style={{ backgroundColor: hexCode}} className='h-4 w-4 rounded-full mr-4' ></div>
                             <span>{colorName}</span>
+                            {hexCode === budgets.theme && <p className="ml-2 text-gray-500 text-xs">Already in use</p>}
                         
                         </li>
                     ))}
