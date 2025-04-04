@@ -14,6 +14,7 @@ const Budget = ({data}) => {
         }
     }, [data])
     const [showAddBudgets, setShowAddBudgets] = useState(false)
+    const [showTheme, setShowTheme] = useState(false)
     const categories = [...new Set(data.transactions?.map(items => items.category))].sort()
     const budgetCategories = budgets.map(tx => tx.category)
     const [maximumSpending, setMaximumSpending] = useState("")
@@ -87,6 +88,7 @@ const Budget = ({data}) => {
 
     return (
         <section className=" min-h-screen p-4 bg-[#F8f4f0] overflow-hidden">
+            <div className={`${showAddBudgets ? "bg-black absolute top-0 right-[0.5px] z-20 w-full h-[900px] opacity-70" : ""}`}></div>
             <div className="flex flex-row justify-between  w-full">
                 <h1 className="font-bold text-[32px]">Budgets</h1>
 
@@ -120,7 +122,7 @@ const Budget = ({data}) => {
                         <div key={index} className="flex flex-row items-center w-full p-3 border-b border-gray-300">
                             <div style={{ backgroundColor: budget.theme}} className="h-5 rounded-full w-1 mr-3"></div>
                             <div className="flex flex-row items-center justify-between w-full">
-                                <p className="w-44">{budget.category}</p>
+                                <p className="w-36 ">{budget.category}</p>
                                 <div className="flex flex-row items-center text-right">
                                     <p className="font-bold">${budget.totalSpent}</p>
                                     <p className="text-xs ml-2">of ${budget.maximum.toLocaleString(undefined, {
@@ -232,7 +234,7 @@ const Budget = ({data}) => {
                 ))}
             </article>
 
-            <div className={`w-80 p-4 ${showAddBudgets ? " absolute bottom-40 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
+            <div className={`w-80 p-4 ${showAddBudgets ? " absolute bottom-56 xs:bottom-68 xs:right-7 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
                 <div className="flex flex-row items-center justify-between my-4">
                     <h2 className="text-xl font-bold">Add New Budget</h2>
                     <img src={icon_close} alt="icon close" onClick={handleShowAddBudget}/>
@@ -269,8 +271,8 @@ const Budget = ({data}) => {
                     />
                 </label>
 
-                <ThemeDropDown data={data}/>
-                <button className="bg-gray-900 text-white w-full mt-4 p-3 rounded-xl">Add Budget</button>
+                <ThemeDropDown data={data} showTheme={showTheme} setShowTheme={setShowTheme}/>
+                {!showTheme && <button className="bg-gray-900 text-white w-full mt-4 p-3 rounded-xl">Add Budget</button>}
                 
             </div>
         </section>

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import icon_down from '../assets/images/icon-caret-down.svg'
 
-const ThemeDropDown = ({data}) => {
+const ThemeDropDown = ({data, showTheme, setShowTheme}) => {
 
-    const [showTheme, setShowTheme] = useState(false)
+    
 
     const theme = {
         Green: '#277C78',
@@ -41,8 +41,10 @@ const ThemeDropDown = ({data}) => {
 
                     </button>
                </div>
-                <ul className={` ${showTheme ? "flex  flex-col bg-white px-4 cursor-pointer" : "hidden"}`} >
-                    {Object.entries(theme).map(([colorName, hexCode]) => (
+                <ul className={` ${showTheme ? "flex  flex-col bg-white px-4 cursor-pointer rounded-b-2xl" : "hidden"}`} >
+                    {Object.entries(theme).map(([colorName, hexCode]) => {
+                        const inUse = budgets.some(budget => budget.theme === hexCode)
+                        return (
                         <li key={colorName} className='flex flex-row items-center border-b border-gray-300 py-2 text-sm' onClick={() => {
                             setCurrentTheme({name: colorName, hex: hexCode});
                             setShowTheme(false)
@@ -51,10 +53,10 @@ const ThemeDropDown = ({data}) => {
                            
                             <div style={{ backgroundColor: hexCode}} className='h-4 w-4 rounded-full mr-4' ></div>
                             <span>{colorName}</span>
-                            {hexCode === budgets.theme && <p className="ml-2 text-gray-500 text-xs">Already in use</p>}
+                            {inUse && <p className="ml-2 text-gray-500 text-xs">Already in use</p>}
                         
                         </li>
-                    ))}
+                    )})}
                 </ul>
             </div>
         </section>
