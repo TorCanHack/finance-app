@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ThemeDropDown from "../components/ThemeDropDown";
 import icon_close from '../assets/images/icon-close-modal.svg'
 import DonutChart from "../components/DonutChart";
+import { addNewRecords } from "../api/Api";
 
 const Budget = ({data}) => {
 
@@ -18,6 +19,9 @@ const Budget = ({data}) => {
     const categories = [...new Set(data.transactions?.map(items => items.category))].sort()
     const budgetCategories = budgets.map(tx => tx.category)
     const [maximumSpending, setMaximumSpending] = useState("")
+    const [budgetCategory, setBudgetCategory] = useState("")
+    const [budgetTheme, setBudgetTheme] = useState("")
+    const [error, setError]  = useState("")
 
     
 
@@ -85,6 +89,48 @@ const Budget = ({data}) => {
     }
 
     const budgetsSpending = displayLatestMonthSpending(transactions, budgetCategories); 
+
+    const addBudget = async (newBudget) => {
+
+        try {
+            const response = await addNewRecords({
+                type: 'Budget',
+                category: newBudget.category,
+                maximum: newBudget.maximum,
+                theme: newBudget.theme
+
+            })
+
+            setBudgets( prev => [...prev, response])
+            setCategory('');
+            setMaximumSpending('$');
+            setTheme('');
+            setShowAddBudgets(false);
+
+        } catch (error) {
+            console.error('Failed to catch error', error)
+        }
+
+    }
+
+    const handleSubmit = () => {
+
+        const maximum = parseFloat(maximumSpending.replace("$", ""));
+
+        if (!budgetCategory || !maximum || !budgetTheme){
+            setError("Please fill all fields")
+            return
+        }
+        const newBudget = {
+
+            budgetCategory,
+            maximum,
+            budgetTheme
+
+        }
+
+        addBudget(newBudget);
+    }
 
     return (
         <section className=" min-h-screen p-4 bg-[#F8f4f0] overflow-hidden">
@@ -243,7 +289,7 @@ const Budget = ({data}) => {
 
                 <label className="flex flex-col mb-4">
                     <span>Budget Category</span>
-                    <select className="border border-black w-full py-2 px-4 rounded-md bg-white">
+                    <select className="border border-black w-full py-2 px-4 rounded-md bg-white" onChange={(e) => setBudgetCategory(e.target.value)} value={budgetCategory}>
                         {categories.map((category, index) => (
                             
                             <option 
@@ -265,13 +311,14 @@ const Budget = ({data}) => {
                         className="px-4 border border-black w-full py-2 rounded-md mb-4" 
                         value={maximumSpending} 
                         onChange={(e) =>  {
-                        const rawtext = e.target.value.replace(/\$/g, "")
+                        const rawtext = e.target.value.replace(/[^\d.]/g, "")
                         setMaximumSpending("$" + rawtext)}}
                         
                     />
                 </label>
 
-                <ThemeDropDown data={data} showTheme={showTheme} setShowTheme={setShowTheme}/>
+                <ThemeDropDown 
+                    data={data} showTheme={showTheme} setShowTheme={setShowTheme} setBudgetTheme={setBudgetTheme}/>
                 {!showTheme && <button className="bg-gray-900 text-white w-full mt-4 p-3 rounded-xl">Add Budget</button>}
                 
             </div>
