@@ -3,7 +3,8 @@ import ThemeDropDown from "../components/ThemeDropDown";
 import icon_close from '../assets/images/icon-close-modal.svg'
 import DonutChart from "../components/DonutChart";
 import { addNewRecords } from "../api/Api";
-
+//how about if a budget category already exists? 
+//tblet and desktop resolution remaining
 const Budget = ({data}) => {
 
     const transactions = data.transactions || []
@@ -102,9 +103,9 @@ const Budget = ({data}) => {
             })
 
             setBudgets( prev => [...prev, response])
-            setCategory('');
+            setBudgetCategory('');
             setMaximumSpending('$');
-            setTheme('');
+            setBudgetTheme('');
             setShowAddBudgets(false);
 
         } catch (error) {
@@ -247,7 +248,7 @@ const Budget = ({data}) => {
                             
                         </div>
 
-                        <div className="bg-[#F8f4f0]">
+                        <div className="bg-[#F8f4f0] border border-black rounded-lg">
                             <div className="flex flex-row justify-between">
                                 <h3>Latest Spending</h3>
 
