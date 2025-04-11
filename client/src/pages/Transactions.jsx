@@ -6,13 +6,13 @@ import icon_next from '../assets/images/icon-caret-right.svg'
 import icon_down from '../assets/images/icon-caret-down.svg'
 import { useEffect, useMemo, useState } from 'react'
 
-const Transactions = ({data}) => {
+const Transactions = ({data, activeCategory, setActiveCategory}) => {
 
     const transactions = useMemo(() => data?.transactions || [], [data])
     const [filteredTransaction, setFilteredTransaction] = useState(transactions);
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOption, setSortOption] = useState('');
-    const [activeCategory, setActiveCategory] = useState('');
+    
     const [showSortMenu, setShowSortMenu] = useState(false);
     const [showFilterMenu, setShowFilterMenu] = useState(false);
 

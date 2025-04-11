@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import ThemeDropDown from "../components/ThemeDropDown";
 import icon_close from '../assets/images/icon-close-modal.svg'
+import caret_right from '../assets/images/icon-caret-right.svg'
 import DonutChart from "../components/DonutChart";
 import { addNewRecords } from "../api/Api";
+import { useNavigate } from "react-router-dom";
 //how about if a budget category already exists? 
 //tblet and desktop resolution remaining
-const Budget = ({data}) => {
+const Budget = ({data, setActiveCategory}) => {
 
+
+    const navigate = useNavigate()
     const transactions = data.transactions || []
     const [budgets, setBudgets] = useState([])
 
@@ -30,6 +34,10 @@ const Budget = ({data}) => {
 
     const handleShowAddBudget = () => {
         setShowAddBudgets(!showAddBudgets)
+        setBudgetCategory('');
+        setMaximumSpending('$');
+        setBudgetTheme('');
+        setError("")
     }
 
     const totalbudgetSpend = transactions.filter(tx => budgets.some(budget => budget.category === tx.category)).reduce((sum, tx) => sum + tx.amount, 0)
@@ -96,9 +104,9 @@ const Budget = ({data}) => {
         try {
             const response = await addNewRecords({
                 type: 'Budget',
-                category: newBudget.category,
+                category: newBudget.budgetCategory,
                 maximum: newBudget.maximum,
-                theme: newBudget.theme
+                theme: newBudget.budgetTheme
 
             })
 
@@ -106,6 +114,7 @@ const Budget = ({data}) => {
             setBudgetCategory('');
             setMaximumSpending('$');
             setBudgetTheme('');
+            setError("")
             setShowAddBudgets(false);
 
         } catch (error) {
@@ -122,6 +131,11 @@ const Budget = ({data}) => {
             setError("Please fill all fields")
             return
         }
+
+        if (budgetCategories.includes(budgetCategory)){
+            setError("Budget already exists")
+            return
+        }
         const newBudget = {
 
             budgetCategory,
@@ -133,6 +147,12 @@ const Budget = ({data}) => {
         addBudget(newBudget);
     }
 
+    const handleSeeAll = () => {
+        navigate("/transactions")
+        
+
+    }
+
     return (
         <section className=" min-h-screen p-4 bg-[#F8f4f0] overflow-hidden">
             <div className={`${showAddBudgets ? "bg-black absolute top-0 right-[0.5px] z-20 w-full h-[900px] opacity-70" : ""}`}></div>
@@ -140,20 +160,24 @@ const Budget = ({data}) => {
                 <h1 className="font-bold text-[32px]">Budgets</h1>
 
                 <button 
-                    className=" text-sm text-white border border-gray-400 bg-gray-900 cursor-pointer rounded-xl py-2 px-4 mb-6" 
+                    className=" text-sm text-white border border-gray-400 bg-gray-900 cursor-pointer rounded-xl py-2 px-4 mb-6 md:h-14" 
                     onClick={handleShowAddBudget}
                 > 
                     + Add New Budget
                 </button>
             </div>
 
-            <article className="flex flex-col items-center w-full bg-white py-4 mb-8 rounded-2xl px-2">
-                <DonutChart data={data}/>
-                <div className="flex flex-col items-center  relative bottom-44">
-                    <p className="text-[32px] font-bold">${Math.abs(totalbudgetSpend).toFixed(0)}</p>
-                    <p className="text-xs">of ${budgetLimit} limit</p>
-                    
+            <article className="flex flex-col items-center w-full bg-white py-4 mb-8 rounded-2xl px-2 ">
+                <div>
+                    <DonutChart data={data}/>
+                    <div className="flex flex-col items-center  relative bottom-44">
+                        <p className="text-[32px] font-bold">${Math.abs(totalbudgetSpend).toFixed(0)}</p>
+                        <p className="text-xs">of ${budgetLimit} limit</p>
+                        
+                    </div>
+
                 </div>
+               
                 <div className="flex flex-col   w-full -mt-16">
                     <h2 className="text-xl font-bold mb-4 px-2">Spending summary</h2>
                     {budgets.map( budget => {
@@ -185,7 +209,7 @@ const Budget = ({data}) => {
                 </div>
             </article>
 
-            <article className="bg-white p-4">
+            <article className=" py-4">
                 {transactions.map(tx => {
                     const matchingBudget = budgets.find(budget => budget.category === tx.category)
                     return {
@@ -220,8 +244,8 @@ const Budget = ({data}) => {
                 .map((tx, index) => (
 
                     
-                    <div key={index} className="mb-4">
-                        <div className="flex flex-row">
+                    <div key={index} className="my-4 bg-white rounded-xl p-4 ">
+                        <div className="flex flex-row  items-center mb-3">
                             <div style={{backgroundColor: tx.theme}} className="w-4 h-4 rounded-full mr-4"></div>
                             <h2 className="text-xl font-bold">{tx.budgetcategory}</h2>
                         </div>
@@ -248,23 +272,30 @@ const Budget = ({data}) => {
                             
                         </div>
 
-                        <div className="bg-[#F8f4f0] border border-black rounded-lg">
-                            <div className="flex flex-row justify-between">
-                                <h3>Latest Spending</h3>
+                        <div className="bg-[#F8f4f0]  rounded-lg p-3 my-4">
+                            <div className="flex flex-row justify-between mb-3">
+                                <h3 className="font-bold">Latest Spending</h3>
 
-                                <button>See all</button>
+                                <button 
+                                    className="flex flex-row justify-between items-center w-16 text-sm cursor-pointer" 
+                                    onClick={() => {handleSeeAll(), setActiveCategory(tx.budgetcategory)}}
+                                >
+                                    See all
+                                    
+                                    <img src={caret_right} alt="" className="w-4 h-4"/>
+                                </button>
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-3 ">
                                 {transactions
                                 .filter(t => t.category === tx.budgetcategory)
                                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                                 .slice(0, 3) // Get the 3 most recent transactions for this category
                                 .map((transaction, idx) => (
-                                    <div key={idx} className="flex justify-between border-b pb-2">
-                                        <p className="font-medium">{transaction.name}</p>
-                                        <div className="text-right">
-                                            <p className="font-medium">${Math.abs(transaction.amount).toFixed(2)}</p>
-                                            <p className="text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString('en-US', {
+                                    <div key={idx} className="flex justify-between border-b border-gray-300  pb-2">
+                                        <p className="font-bold text-xs">{transaction.name}</p>
+                                        <div className="text-right mb-3">
+                                            <p className="font-medium text-xs">${Math.abs(transaction.amount).toFixed(2)}</p>
+                                            <p className=" text-gray-500 text-xs">{new Date(transaction.date).toLocaleDateString('en-US', {
                                                 year: 'numeric',
                                                 month: 'short',
                                                 day: '2-digit',
@@ -288,6 +319,8 @@ const Budget = ({data}) => {
                 </div>
                 <p className="text-gray-500 text-sm mb-4">Choose a category to set a spending budget. These categories can help you monitor spending</p>
 
+                {error && <p className="text-red-500 text-center font-bold">{error}</p>}
+
                 <label className="flex flex-col mb-4">
                     <span>Budget Category</span>
                     <select className="border border-black w-full py-2 px-4 rounded-md bg-white" onChange={(e) => setBudgetCategory(e.target.value)} value={budgetCategory}>
@@ -303,6 +336,7 @@ const Budget = ({data}) => {
                         ))}
                     </select>
                 </label>
+                
 
                 <label>
                     <span>Maximum Spending</span>
@@ -319,8 +353,13 @@ const Budget = ({data}) => {
                 </label>
 
                 <ThemeDropDown 
-                    data={data} showTheme={showTheme} setShowTheme={setShowTheme} setBudgetTheme={setBudgetTheme}/>
-                {!showTheme && <button className="bg-gray-900 text-white w-full mt-4 p-3 rounded-xl">Add Budget</button>}
+                    data={data} 
+                    showTheme={showTheme} 
+                    setShowTheme={setShowTheme}
+                    budgetTheme={budgetTheme}
+                    setBudgetTheme={setBudgetTheme}
+                />
+                {!showTheme && <button className="bg-gray-900 text-white w-full mt-4 p-3 rounded-xl" onClick={handleSubmit}>Add Budget</button>}
                 
             </div>
         </section>

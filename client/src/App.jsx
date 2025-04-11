@@ -11,6 +11,7 @@ function App() {
 
   const [data, setData] = useState({})
   const [error, setError] = useState("")
+  const [activeCategory, setActiveCategory] = useState('');
   const theme = {
     Green: '#277C78',
     Cyan: '#82C9D7',
@@ -44,8 +45,8 @@ function App() {
         <Routes>
         
           <Route path="/" element={<Home data={data}/>}/>
-          <Route path="/transactions" element={<Transactions data={data}/>}/>
-          <Route path="/budget" element={<Budget data={data} theme={theme}/>}/>
+          <Route path="/transactions" element={<Transactions data={data} activeCategory={activeCategory} setActiveCategory={setActiveCategory} /> }/>
+          <Route path="/budget" element={<Budget data={data} theme={theme} activeCategory={activeCategory} setActiveCategory={setActiveCategory}/>}/>
 
         </Routes>
         <Navigation/>

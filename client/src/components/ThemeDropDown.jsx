@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import icon_down from '../assets/images/icon-caret-down.svg'
 
-const ThemeDropDown = ({data, showTheme, setShowTheme, setBudgetTheme}) => {
+const ThemeDropDown = ({data, showTheme, setShowTheme, budgetTheme, setBudgetTheme}) => {
 
     
 
@@ -45,10 +45,14 @@ const ThemeDropDown = ({data, showTheme, setShowTheme, setBudgetTheme}) => {
                     {Object.entries(theme).map(([colorName, hexCode]) => {
                         const inUse = budgets.some(budget => budget.theme === hexCode)
                         return (
-                        <li key={colorName} className='flex flex-row items-center border-b border-gray-300 py-2 text-sm' onClick={() => {
-                            setCurrentTheme({name: colorName, hex: hexCode});
-                            setShowTheme(false)
-                            setBudgetTheme(hexCode);
+                        <li 
+                            key={colorName} 
+                            className='flex flex-row items-center border-b border-gray-300 py-2 text-sm' 
+                            value={budgetTheme}
+                            onClick={() => {
+                                setCurrentTheme({name: colorName, hex: hexCode});
+                                setShowTheme(false)
+                                setBudgetTheme(hexCode);
                             }}
                         >
                            
