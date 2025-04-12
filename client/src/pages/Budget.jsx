@@ -167,8 +167,8 @@ const Budget = ({data, setActiveCategory}) => {
                 </button>
             </div>
 
-            <article className="flex flex-col items-center w-full bg-white py-4 mb-8 rounded-2xl px-2 ">
-                <div>
+            <article className="flex flex-col items-center w-full bg-white py-4 mb-8 rounded-2xl px-2 md:flex-row md:px-6">
+                <div className=""> 
                     <DonutChart data={data}/>
                     <div className="flex flex-col items-center  relative bottom-44">
                         <p className="text-[32px] font-bold">${Math.abs(totalbudgetSpend).toFixed(0)}</p>
@@ -178,7 +178,7 @@ const Budget = ({data, setActiveCategory}) => {
 
                 </div>
                
-                <div className="flex flex-col   w-full -mt-16">
+                <div className="flex flex-col   w-full -mt-16 md:-mt-10">
                     <h2 className="text-xl font-bold mb-4 px-2">Spending summary</h2>
                     {budgets.map( budget => {
                         //find matching spending data
@@ -190,7 +190,7 @@ const Budget = ({data, setActiveCategory}) => {
                     })
                     .sort((a,b) => b.totalSpent - a.totalSpent) //sort by total spent decending
                     .map((budget, index) => (
-                        <div key={index} className="flex flex-row items-center w-full p-3 border-b border-gray-300">
+                        <div key={index} className="flex flex-row items-center w-full p-3 border-b border-gray-300 md:mb-4">
                             <div style={{ backgroundColor: budget.theme}} className="h-5 rounded-full w-1 mr-3"></div>
                             <div className="flex flex-row items-center justify-between w-full">
                                 <p className="w-36 ">{budget.category}</p>
@@ -258,7 +258,7 @@ const Budget = ({data, setActiveCategory}) => {
                         <div>
                             <div className="flex flex-row" >
 
-                                <div className="border-l-4  w-36 rounded-xs px-4" style={{borderColor: tx.theme}}>
+                                <div className="border-l-4  w-36 rounded-xs px-4 md:w-96" style={{borderColor: tx.theme}}>
                                     <h3>Spent</h3>
                                     <p>${Math.abs(tx.totalSpent).toFixed(0)}</p>
                                 </div>
@@ -292,7 +292,10 @@ const Budget = ({data, setActiveCategory}) => {
                                 .slice(0, 3) // Get the 3 most recent transactions for this category
                                 .map((transaction, idx) => (
                                     <div key={idx} className="flex justify-between border-b border-gray-300  pb-2">
-                                        <p className="font-bold text-xs">{transaction.name}</p>
+                                        <div className="md:flex md:items-center">
+                                            <img src={transaction.avatar} alt="" className="hidden md:flex w-8 h-8 rounded-full mr-3"/>
+                                            <p className="font-bold text-xs">{transaction.name}</p>
+                                        </div>
                                         <div className="text-right mb-3">
                                             <p className="font-medium text-xs">${Math.abs(transaction.amount).toFixed(2)}</p>
                                             <p className=" text-gray-500 text-xs">{new Date(transaction.date).toLocaleDateString('en-US', {

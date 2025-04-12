@@ -1,6 +1,9 @@
 import { PieChart, Pie, Cell, Tooltip, Legend} from "recharts"
+import {useMediaQuery} from 'react-responsive'
 
 const DonutChart  = ({data}) => {
+
+    const isMd = useMediaQuery({minWidth: 768})
 
     const pieData = data.budgets? data.budgets.map(budget => ({
         name: budget.category,
@@ -18,8 +21,8 @@ const DonutChart  = ({data}) => {
                     dataKey="value"
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={120}
+                    innerRadius={ isMd? 100: 60}
+                    outerRadius={ isMd? 150: 120}
                     fill="blue"
                 >
                     {pieData.map((entry, index) => (
