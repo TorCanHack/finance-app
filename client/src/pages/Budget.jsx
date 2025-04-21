@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import ThemeDropDown from "../components/ThemeDropDown";
 import icon_close from '../assets/images/icon-close-modal.svg'
 import caret_right from '../assets/images/icon-caret-right.svg'
+import elipsis from '../assets/images/icon-ellipsis.svg'
 import DonutChart from "../components/DonutChart";
 import { addNewRecords } from "../api/Api";
 import { useNavigate } from "react-router-dom";
-//how about if a budget category already exists? 
-//tblet and desktop resolution remaining
+import AddBudgetModal from "../components/AddBudgetModal";
+//edit and delete popup feature missing
 const Budget = ({data, setActiveCategory}) => {
 
 
@@ -89,11 +90,6 @@ const Budget = ({data, setActiveCategory}) => {
             calculateLatestMonthCategorySpending(transactions, category)
         );
 
-        //display the results
-        results.forEach(result => {
-            console.log(`${result.category}: $${result.totalSpent.toFixed(2)}`)
-        })
-
         return results
     }
 
@@ -103,12 +99,14 @@ const Budget = ({data, setActiveCategory}) => {
 
         try {
             const response = await addNewRecords({
-                type: 'Budget',
+                type: 'budget',
                 category: newBudget.budgetCategory,
                 maximum: newBudget.maximum,
                 theme: newBudget.budgetTheme
 
             })
+
+            console.log("data", response)
 
             setBudgets( prev => [...prev, response])
             setBudgetCategory('');
@@ -144,6 +142,8 @@ const Budget = ({data, setActiveCategory}) => {
 
         }
 
+        console.log("new budget", newBudget)
+
         addBudget(newBudget);
     }
 
@@ -154,7 +154,7 @@ const Budget = ({data, setActiveCategory}) => {
     }
 
     return (
-        <section className=" min-h-screen p-4 bg-[#F8f4f0] overflow-hidden">
+        <section className=" min-h-screen p-4 bg-[#F8f4f0] overflow-hidden lg:w-full">
             <div className={`${showAddBudgets ? "bg-black absolute top-0 right-[0.5px] z-20 w-full h-[900px] opacity-70" : ""}`}></div>
             <div className="flex flex-row justify-between  w-full">
                 <h1 className="font-bold text-[32px]">Budgets</h1>
@@ -167,202 +167,165 @@ const Budget = ({data, setActiveCategory}) => {
                 </button>
             </div>
 
-            <article className="flex flex-col items-center w-full bg-white py-4 mb-8 rounded-2xl px-2 md:flex-row md:px-6">
-                <div className=""> 
-                    <DonutChart data={data}/>
-                    <div className="flex flex-col items-center  relative bottom-44">
-                        <p className="text-[32px] font-bold">${Math.abs(totalbudgetSpend).toFixed(0)}</p>
-                        <p className="text-xs">of ${budgetLimit} limit</p>
-                        
-                    </div>
+            <div className="lg:flex lg:flex-row lg:justify-between lg:w-full lg:px-6 ">
+                <article className="flex flex-col items-center w-full bg-white py-4 mb-8 rounded-2xl px-2 md:flex-row md:px-6 lg:mb-0 lg:w-[428px] lg:h-full lg:flex-col lg:mt-4">
+                    <div className=""> 
+                        <DonutChart data={data}/>
+                        <div className="flex flex-col items-center  relative bottom-44">
+                            <p className="text-[32px] font-bold">${Math.abs(totalbudgetSpend).toFixed(0)}</p>
+                            <p className="text-xs">of ${budgetLimit} limit</p>
+                            
+                        </div>
 
-                </div>
-               
-                <div className="flex flex-col   w-full -mt-16 md:-mt-10">
-                    <h2 className="text-xl font-bold mb-4 px-2">Spending summary</h2>
-                    {budgets.map( budget => {
-                        //find matching spending data
-                        const spending = budgetsSpending.find(result => result.category === budget.category);
-                        return {
-                            ...budget,
-                            totalSpent: spending? spending.totalSpent : 0
-                        };
-                    })
-                    .sort((a,b) => b.totalSpent - a.totalSpent) //sort by total spent decending
-                    .map((budget, index) => (
-                        <div key={index} className="flex flex-row items-center w-full p-3 border-b border-gray-300 md:mb-4">
-                            <div style={{ backgroundColor: budget.theme}} className="h-5 rounded-full w-1 mr-3"></div>
-                            <div className="flex flex-row items-center justify-between w-full">
-                                <p className="w-36 ">{budget.category}</p>
-                                <div className="flex flex-row items-center text-right">
-                                    <p className="font-bold">${budget.totalSpent}</p>
-                                    <p className="text-xs ml-2">of ${budget.maximum.toLocaleString(undefined, {
-                                        minimumFractionDigits: 2, 
-                                        maximumFractionDigits: 2
-                                    })}</p>
+                    </div>
+                
+                    <div className="flex flex-col   w-full -mt-16 md:-mt-10">
+                        <h2 className="text-xl font-bold mb-4 px-2">Spending summary</h2>
+                        {budgets.map( budget => {
+                            //find matching spending data
+                            const spending = budgetsSpending.find(result => result.category === budget.category);
+                            return {
+                                ...budget,
+                                totalSpent: spending? spending.totalSpent : 0
+                            };
+                        })
+                        .sort((a,b) => b.totalSpent - a.totalSpent) //sort by total spent decending
+                        .map((budget, index) => (
+                            <div key={index} className="flex flex-row items-center w-full p-3 border-b border-gray-300 md:mb-4">
+                                <div style={{ backgroundColor: budget.theme}} className="h-5 rounded-full w-1 mr-3"></div>
+                                <div className="flex flex-row items-center justify-between w-full">
+                                    <p className="w-36 ">{budget.category}</p>
+                                    <div className="flex flex-row items-center text-right">
+                                        <p className="font-bold">${budget.totalSpent}</p>
+                                        <p className="text-xs ml-2">of ${budget.maximum.toLocaleString(undefined, {
+                                            minimumFractionDigits: 2, 
+                                            maximumFractionDigits: 2
+                                        })}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                    ))}
-                   
-                </div>
-            </article>
-
-            <article className=" py-4">
-                {transactions.map(tx => {
-                    const matchingBudget = budgets.find(budget => budget.category === tx.category)
-                    return {
-                        ...tx,
-                        budgetcategory: matchingBudget? matchingBudget.category: null,
-                        maximum: matchingBudget ? matchingBudget.maximum : null,
-                        theme: matchingBudget ? matchingBudget.theme : null
-                    }
-                })
-                .filter((tx, index, self) => 
-                    tx.budgetcategory &&
-                    index === self.findIndex(t => t.budgetcategory === tx.budgetcategory)
-                )
-                .map(tx => {
-                    const totalSpent = transactions
-                        .filter( t => t.category === tx.budgetcategory)
-                        .reduce((sum, t) => sum + t.amount, 0)
-
-                    const spendingPercentage = tx.maximum ? Math.min((Math.abs(totalSpent)/tx.maximum) * 100, 100) : 0;
-                    const freeCash = tx.maximum - Math.abs(totalSpent) 
-                    const freeAmount = freeCash > 0 ? freeCash : 0
+                        ))}
                     
+                    </div>
+                </article>
 
-                    return {
-                        ...tx,
-                        totalSpent: totalSpent ? totalSpent : null,
-                        spendingPercentage: spendingPercentage ? spendingPercentage : null,
-                        freeAmount: freeAmount
-                    }
+                <article className=" py-4 lg:w-[606px] lg:py-0">
+                    {transactions.map(tx => {
+                        const matchingBudget = budgets.find(budget => budget.category === tx.category)
+                        return {
+                            ...tx,
+                            budgetcategory: matchingBudget? matchingBudget.category: null,
+                            maximum: matchingBudget ? matchingBudget.maximum : null,
+                            theme: matchingBudget ? matchingBudget.theme : null
+                        }
+                    })
+                    .filter((tx, index, self) => 
+                        tx.budgetcategory &&
+                        index === self.findIndex(t => t.budgetcategory === tx.budgetcategory)
+                    )
+                    .map(tx => {
+                        const totalSpent = transactions
+                            .filter( t => t.category === tx.budgetcategory)
+                            .reduce((sum, t) => sum + t.amount, 0)
 
-                })
-                .map((tx, index) => (
+                        const spendingPercentage = tx.maximum ? Math.min((Math.abs(totalSpent)/tx.maximum) * 100, 100) : 0;
+                        const freeCash = tx.maximum - Math.abs(totalSpent) 
+                        const freeAmount = freeCash > 0 ? freeCash : 0
+                        
 
-                    
-                    <div key={index} className="my-4 bg-white rounded-xl p-4 ">
-                        <div className="flex flex-row  items-center mb-3">
-                            <div style={{backgroundColor: tx.theme}} className="w-4 h-4 rounded-full mr-4"></div>
-                            <h2 className="text-xl font-bold">{tx.budgetcategory}</h2>
-                        </div>
-                        <p>Maximum of ${tx.maximum} </p>
-                        <div className="my-4 bg-[#F8f4f0] p-1.5 rounded-md">
-                            <div style={{ backgroundColor: tx.theme, width: `${tx.spendingPercentage}%`}} className="h-4">
+                        return {
+                            ...tx,
+                            totalSpent: totalSpent ? totalSpent : null,
+                            spendingPercentage: spendingPercentage ? spendingPercentage : null,
+                            freeAmount: freeAmount
+                        }
+
+                    })
+                    .map((tx, index) => (
+
+                        
+                        <div key={index} className="my-4 bg-white rounded-xl p-4 ">
+                            <div className="flex flex-row justify-between  items-center mb-3">
+                                <div className="flex flex-row">
+                                    <div style={{backgroundColor: tx.theme}} className="w-4 h-4 rounded-full mr-4"></div>
+                                    <h2 className="text-xl font-bold">{tx.budgetcategory}</h2>
+                                </div>
+                                <button className="cursor-pointer">
+                                    <img src={elipsis} alt="ellipsis image" />
+
+                                </button>
                                 
                             </div>
-                        </div>
-                        <div>
-                            <div className="flex flex-row" >
-
-                                <div className="border-l-4  w-36 rounded-xs px-4 md:w-96" style={{borderColor: tx.theme}}>
-                                    <h3>Spent</h3>
-                                    <p>${Math.abs(tx.totalSpent).toFixed(0)}</p>
-                                </div>
-
-                            
-                                <div className="border-l-4 w-36 rounded-xs border-[#F8f4f0] px-2">
-                                    <h3>Free</h3>
-                                    <p>${tx.freeAmount.toFixed(0)}</p>
-                                </div>
-                            </div>
-                            
-                        </div>
-
-                        <div className="bg-[#F8f4f0]  rounded-lg p-3 my-4">
-                            <div className="flex flex-row justify-between mb-3">
-                                <h3 className="font-bold">Latest Spending</h3>
-
-                                <button 
-                                    className="flex flex-row justify-between items-center w-16 text-sm cursor-pointer" 
-                                    onClick={() => {handleSeeAll(), setActiveCategory(tx.budgetcategory)}}
-                                >
-                                    See all
+                            <p>Maximum of ${tx.maximum} </p>
+                            <div className="my-4 bg-[#F8f4f0] p-1.5 rounded-md">
+                                <div style={{ backgroundColor: tx.theme, width: `${tx.spendingPercentage}%`}} className="h-4">
                                     
-                                    <img src={caret_right} alt="" className="w-4 h-4"/>
-                                </button>
+                                </div>
                             </div>
-                            <div className="space-y-3 ">
-                                {transactions
-                                .filter(t => t.category === tx.budgetcategory)
-                                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                                .slice(0, 3) // Get the 3 most recent transactions for this category
-                                .map((transaction, idx) => (
-                                    <div key={idx} className="flex justify-between border-b border-gray-300  pb-2">
-                                        <div className="md:flex md:items-center">
-                                            <img src={transaction.avatar} alt="" className="hidden md:flex w-8 h-8 rounded-full mr-3"/>
-                                            <p className="font-bold text-xs">{transaction.name}</p>
-                                        </div>
-                                        <div className="text-right mb-3">
-                                            <p className="font-medium text-xs">${Math.abs(transaction.amount).toFixed(2)}</p>
-                                            <p className=" text-gray-500 text-xs">{new Date(transaction.date).toLocaleDateString('en-US', {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: '2-digit',
-                                            })}</p> 
-                                        </div>
+                            <div>
+                                <div className="flex flex-row" >
+
+                                    <div className="border-l-4  w-36 rounded-xs px-4 md:w-96" style={{borderColor: tx.theme}}>
+                                        <h3>Spent</h3>
+                                        <p>${Math.abs(tx.totalSpent).toFixed(0)}</p>
                                     </div>
-                                ))}
+
+                                
+                                    <div className="border-l-4 w-36 rounded-xs border-[#F8f4f0] px-2">
+                                        <h3>Free</h3>
+                                        <p>${tx.freeAmount.toFixed(0)}</p>
+                                    </div>
+                                </div>
+                                
+                            </div>
+
+                            <div className="bg-[#F8f4f0]  rounded-lg p-3 my-4">
+                                <div className="flex flex-row justify-between mb-3">
+                                    <h3 className="font-bold">Latest Spending</h3>
+
+                                    <button 
+                                        className="flex flex-row justify-between items-center w-16 text-sm cursor-pointer" 
+                                        onClick={() => {handleSeeAll(), setActiveCategory(tx.budgetcategory)}}
+                                    >
+                                        See all
+                                        
+                                        <img src={caret_right} alt="" className="w-4 h-4"/>
+                                    </button>
+                                </div>
+                                <div className="space-y-3 ">
+                                    {transactions
+                                    .filter(t => t.category === tx.budgetcategory)
+                                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                    .slice(0, 3) // Get the 3 most recent transactions for this category
+                                    .map((transaction, idx) => (
+                                        <div key={idx} className="flex justify-between border-b border-gray-300  pb-2">
+                                            <div className="md:flex md:items-center">
+                                                <img src={transaction.avatar} alt="" className="hidden md:flex w-8 h-8 rounded-full mr-3"/>
+                                                <p className="font-bold text-xs">{transaction.name}</p>
+                                            </div>
+                                            <div className="text-right mb-3">
+                                                <p className="font-medium text-xs">${Math.abs(transaction.amount).toFixed(2)}</p>
+                                                <p className=" text-gray-500 text-xs">{new Date(transaction.date).toLocaleDateString('en-US', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: '2-digit',
+                                                })}</p> 
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
                             </div>
 
                         </div>
-
-                    </div>
-                    
-                ))}
-            </article>
+                        
+                    ))}
+                </article>
+            </div>
 
             <div className={`w-80 p-4 ${showAddBudgets ? " absolute bottom-56 xs:bottom-68 xs:right-7 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
-                <div className="flex flex-row items-center justify-between my-4">
-                    <h2 className="text-xl font-bold">Add New Budget</h2>
-                    <img src={icon_close} alt="icon close" onClick={handleShowAddBudget}/>
-                </div>
-                <p className="text-gray-500 text-sm mb-4">Choose a category to set a spending budget. These categories can help you monitor spending</p>
-
-                {error && <p className="text-red-500 text-center font-bold">{error}</p>}
-
-                <label className="flex flex-col mb-4">
-                    <span>Budget Category</span>
-                    <select className="border border-black w-full py-2 px-4 rounded-md bg-white" onChange={(e) => setBudgetCategory(e.target.value)} value={budgetCategory}>
-                        {categories.map((category, index) => (
-                            
-                            <option 
-                                key={index} 
-                                value={category}
-                                
-                            >
-                                {category}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                
-
-                <label>
-                    <span>Maximum Spending</span>
-                    <input 
-                        type="text" 
-                        placeholder="$  e.g. 2000" 
-                        className="px-4 border border-black w-full py-2 rounded-md mb-4" 
-                        value={maximumSpending} 
-                        onChange={(e) =>  {
-                        const rawtext = e.target.value.replace(/[^\d.]/g, "")
-                        setMaximumSpending("$" + rawtext)}}
-                        
-                    />
-                </label>
-
-                <ThemeDropDown 
-                    data={data} 
-                    showTheme={showTheme} 
-                    setShowTheme={setShowTheme}
-                    budgetTheme={budgetTheme}
-                    setBudgetTheme={setBudgetTheme}
-                />
-                {!showTheme && <button className="bg-gray-900 text-white w-full mt-4 p-3 rounded-xl" onClick={handleSubmit}>Add Budget</button>}
+                <AddBudgetModal handleShowAddBudget={handleShowAddBudget} error={error} categories={categories} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} budgetCategory={budgetCategory} setBudgetCategory={setBudgetCategory} handleSubmit={handleSubmit} data={data}/>
                 
             </div>
         </section>
