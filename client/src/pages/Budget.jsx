@@ -4,9 +4,11 @@ import icon_close from '../assets/images/icon-close-modal.svg'
 import caret_right from '../assets/images/icon-caret-right.svg'
 import elipsis from '../assets/images/icon-ellipsis.svg'
 import DonutChart from "../components/DonutChart";
-import { addNewRecords } from "../api/Api";
+import { addNewRecords, updateRecords } from "../api/Api";
 import { useNavigate } from "react-router-dom";
 import AddBudgetModal from "../components/AddBudgetModal";
+import EditBudgetModal from "../components/EditBudgetModal";
+import EditAndDeleteModal from "../components/EditAndDeleteModal";
 //edit and delete popup feature missing
 const Budget = ({data, setActiveCategory}) => {
 
@@ -28,6 +30,10 @@ const Budget = ({data, setActiveCategory}) => {
     const [budgetCategory, setBudgetCategory] = useState("")
     const [budgetTheme, setBudgetTheme] = useState("")
     const [error, setError]  = useState("")
+    const [budgetId, setBudgetId] = useState("")
+    const [showEditBudget, setShowEditBudget] = useState(false)
+    const [activeEditBudgetId, setActiveEditBudgetId] = useState("null")
+    const [showDeleteBudget, setShowDeleteBudget] = useState(false)
 
     
 
@@ -46,54 +52,7 @@ const Budget = ({data, setActiveCategory}) => {
     const budgetLimit = budgets.reduce((sum, budget) => sum + budget.maximum, 0)
     console.log("sum of ",budgetLimit)
 
-    const calculateLatestMonthCategorySpending = (transactions, category) => {
 
-        //find the most recent dates in the transactions
-        const dates = transactions.map(transaction => new Date(transaction.date))
-        const latestDate = new Date(Math.max(...dates));
-
-        //extract year and month from the latest date
-        const latestYear = latestDate.getFullYear();
-        const latestmonth = latestDate.getMonth();
-
-        //filter transaction by category and latest month/year
-        const filteredLatestTransaction = transactions.filter( transaction => {
-            const transactionDate = new Date(transaction.date);
-            return transaction.category === category && 
-                transactionDate.getFullYear() === latestYear &&
-                transactionDate.getMonth() === latestmonth &&
-                transaction.amount < 0;
-
-        })
-
-        //sum the amounts (converting to positive values for spending)
-        const totalSpent = filteredLatestTransaction.reduce((sum, transaction) => 
-            sum + Math.abs(transaction.amount), 0)
-
-        return {
-            category, totalSpent
-        }
-
-        
-    }
-
-    //example usage
-    const displayLatestMonthSpending = (transactions, categories) => {
-
-        //if no specific category is provided, get all the unique categories from the data
-        if (!categories || categories.length === 0){
-            categories = [...new Set(transactions.map(t => t.category))];
-        } 
-
-        //calculate spending for each category
-        const results = categories.map(category => 
-            calculateLatestMonthCategorySpending(transactions, category)
-        );
-
-        return results
-    }
-
-    const budgetsSpending = displayLatestMonthSpending(transactions, budgetCategories); 
 
     const addBudget = async (newBudget) => {
 
@@ -153,6 +112,66 @@ const Budget = ({data, setActiveCategory}) => {
 
     }
 
+    const handleShowEditBudget = (tx) => {
+        setShowEditBudget(true)
+        setBudgetCategory(tx.category)
+        setMaximumSpending(tx.maximum)
+        setBudgetTheme(tx.theme)
+        setBudgetId(tx.id)
+    }
+
+    const handleShowDeleteBudget = () => {
+        setShowDeleteBudget(!showDeleteBudget)
+    }
+
+    const editBudget = async(type, id, newBudget) => {
+        try {
+            const response = await updateRecords('budget', budgetId, {
+                category: newBudget.budgetCategory,
+                maximum: newBudget.maximum,
+                theme: newBudget.budgetTheme})
+
+            setBudgets( prev => [...prev, response])
+            setBudgetCategory('');
+            setMaximumSpending('$');
+            setBudgetTheme('');
+            setError("")
+
+        }  catch (error) {
+            console.error('Failed to catch error', error)
+        }
+    }
+
+    const handleEditSubmit = () => {
+
+        const maximum = parseFloat(maximumSpending.replace("$", ""));
+
+        if (!budgetCategory || !maximum || !budgetTheme){
+            setError("Please fill all fields")
+            return
+        }
+
+        if (!budgetCategories.includes(budgetCategory)){
+            setError("Budget does not exists")
+            return
+        }
+        const newBudget = {
+
+            budgetCategory,
+            maximum,
+            budgetTheme
+
+        }
+
+        editBudget(budgetId, newBudget);
+        setShowEditBudget(false)
+
+
+    }
+    
+
+   
+
     return (
         <section className=" min-h-screen p-4 bg-[#F8f4f0] overflow-hidden lg:w-full">
             <div className={`${showAddBudgets ? "bg-black absolute top-0 right-[0.5px] z-20 w-full h-[900px] opacity-70" : ""}`}></div>
@@ -182,12 +201,16 @@ const Budget = ({data, setActiveCategory}) => {
                     <div className="flex flex-col   w-full -mt-16 md:-mt-10">
                         <h2 className="text-xl font-bold mb-4 px-2">Spending summary</h2>
                         {budgets.map( budget => {
-                            //find matching spending data
-                            const spending = budgetsSpending.find(result => result.category === budget.category);
+                            const spending = transactions
+                                .filter(tx => tx.category === budget.category)
+                                .reduce((sum, tx) => sum + tx.amount, 0)
+
+                            const totalSpent = Math.abs(spending)
                             return {
                                 ...budget,
-                                totalSpent: spending? spending.totalSpent : 0
-                            };
+                                totalSpent: totalSpent ? totalSpent.toFixed(0) : null,
+                            }
+                        
                         })
                         .sort((a,b) => b.totalSpent - a.totalSpent) //sort by total spent decending
                         .map((budget, index) => (
@@ -217,7 +240,8 @@ const Budget = ({data, setActiveCategory}) => {
                             ...tx,
                             budgetcategory: matchingBudget? matchingBudget.category: null,
                             maximum: matchingBudget ? matchingBudget.maximum : null,
-                            theme: matchingBudget ? matchingBudget.theme : null
+                            theme: matchingBudget ? matchingBudget.theme : null,
+                            id: matchingBudget ? matchingBudget.id : null
                         }
                     })
                     .filter((tx, index, self) => 
@@ -251,12 +275,22 @@ const Budget = ({data, setActiveCategory}) => {
                                     <div style={{backgroundColor: tx.theme}} className="w-4 h-4 rounded-full mr-4"></div>
                                     <h2 className="text-xl font-bold">{tx.budgetcategory}</h2>
                                 </div>
-                                <button className="cursor-pointer">
+                                <button 
+                                    className="cursor-pointer"  
+                                    onClick={() => {
+                                        setActiveEditBudgetId(tx.id === activeEditBudgetId ? null : tx.id)
+                                    }}>
                                     <img src={elipsis} alt="ellipsis image" />
 
                                 </button>
                                 
                             </div>
+                            {activeEditBudgetId === tx.id && 
+                            <div className="absolute right-7 z-20 bg-white">
+                                <EditAndDeleteModal onEdit={() => handleShowEditBudget(tx)} onDelete={() => handleShowDeleteBudget()}/>
+
+                            </div>
+                            }
                             <p>Maximum of ${tx.maximum} </p>
                             <div className="my-4 bg-[#F8f4f0] p-1.5 rounded-md">
                                 <div style={{ backgroundColor: tx.theme, width: `${tx.spendingPercentage}%`}} className="h-4">
@@ -324,10 +358,23 @@ const Budget = ({data, setActiveCategory}) => {
                 </article>
             </div>
 
-            <div className={`w-80 p-4 ${showAddBudgets ? " absolute bottom-56 xs:bottom-68 xs:right-7 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
-                <AddBudgetModal handleShowAddBudget={handleShowAddBudget} error={error} categories={categories} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} budgetCategory={budgetCategory} setBudgetCategory={setBudgetCategory} handleSubmit={handleSubmit} data={data}/>
+            <div className={`w-80 p-4 ${(showAddBudgets || showEditBudget) ? " absolute bottom-56 xs:bottom-68 xs:right-7 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
                 
+                {showAddBudgets ? 
+                <AddBudgetModal handleShowAddBudget={handleShowAddBudget} error={error} categories={categories} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} budgetCategory={budgetCategory} setBudgetCategory={setBudgetCategory} handleSubmit={handleSubmit} data={data}/> 
+
+                : showEditBudget ?
+                
+                <EditBudgetModal handleShowAddBudget={handleShowAddBudget} error={error} budgetCategory={budgetCategory} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} data={data} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} handleEditBudget={handleEditSubmit}/>
+            
+                : null}
             </div>
+
+            
+
+            
+
+            
         </section>
     )
 
