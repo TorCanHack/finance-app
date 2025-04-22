@@ -17,9 +17,9 @@ const EditBudgetModal = ({handleShowAddBudget, error, budgetCategory,  maximumSp
                 <span>Budget Category</span>
                 <select 
                         className="border border-black w-full py-2 px-4 rounded-md bg-white" 
-                        value={budgetCategory}
+                        defaultValue={budgetCategory}
                     >
-                    <option value={budgetCategory}>{budgetCategory}</option>
+                    <option defaultValue={budgetCategory}>{budgetCategory}</option>
                 </select>
             </label>
             

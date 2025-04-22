@@ -4,11 +4,12 @@ import icon_close from '../assets/images/icon-close-modal.svg'
 import caret_right from '../assets/images/icon-caret-right.svg'
 import elipsis from '../assets/images/icon-ellipsis.svg'
 import DonutChart from "../components/DonutChart";
-import { addNewRecords, updateRecords } from "../api/Api";
+import { addNewRecords, deleteRecords, updateRecords } from "../api/Api";
 import { useNavigate } from "react-router-dom";
 import AddBudgetModal from "../components/AddBudgetModal";
 import EditBudgetModal from "../components/EditBudgetModal";
 import EditAndDeleteModal from "../components/EditAndDeleteModal";
+import DeleteBudgetModal from "../components/DeleteBudgetModal";
 //edit and delete popup feature missing
 const Budget = ({data, setActiveCategory}) => {
 
@@ -121,12 +122,24 @@ const Budget = ({data, setActiveCategory}) => {
     }
 
     const handleShowDeleteBudget = () => {
-        setShowDeleteBudget(!showDeleteBudget)
+        setShowDeleteBudget(true)
     }
 
-    const editBudget = async(type, id, newBudget) => {
+    
+
+    const deleteBudget = async (id) => {
+        try { await deleteRecords('budget', id)
+            setBudgets(prev => prev.filter(budget => budget.id !== id))
+            setShowDeleteBudget(false)
+        } catch (error) {
+            console.error('Failed to catch error', error)
+        }
+    }
+
+
+    const editBudget = async(id, newBudget) => {
         try {
-            const response = await updateRecords('budget', budgetId, {
+            const response = await updateRecords('budgets', id, {
                 category: newBudget.budgetCategory,
                 maximum: newBudget.maximum,
                 theme: newBudget.budgetTheme})
@@ -162,6 +175,7 @@ const Budget = ({data, setActiveCategory}) => {
             budgetTheme
 
         }
+        console.log("budget id", budgetId)
 
         editBudget(budgetId, newBudget);
         setShowEditBudget(false)
@@ -291,6 +305,14 @@ const Budget = ({data, setActiveCategory}) => {
 
                             </div>
                             }
+                            {activeEditBudgetId === tx.id && showDeleteBudget && 
+                            <div>
+                                <DeleteBudgetModal  
+                                    budgetCategory={tx.budgetcategory} 
+                                    onDelete={() => deleteBudget(tx.id)}
+                                    onClose={() => setShowDeleteBudget(false)}
+                                />
+                            </div>}
                             <p>Maximum of ${tx.maximum} </p>
                             <div className="my-4 bg-[#F8f4f0] p-1.5 rounded-md">
                                 <div style={{ backgroundColor: tx.theme, width: `${tx.spendingPercentage}%`}} className="h-4">
@@ -369,6 +391,7 @@ const Budget = ({data, setActiveCategory}) => {
             
                 : null}
             </div>
+            
 
             
 
