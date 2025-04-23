@@ -22,7 +22,8 @@ const Budget = ({data, setActiveCategory}) => {
         if (data.budgets){
             setBudgets([...data.budgets])
         }
-    }, [data])
+    }, [data.budgets])
+
     const [showAddBudgets, setShowAddBudgets] = useState(false)
     const [showTheme, setShowTheme] = useState(false)
     const categories = [...new Set(data.transactions?.map(items => items.category))].sort()
@@ -38,7 +39,7 @@ const Budget = ({data, setActiveCategory}) => {
 
     
 
-    console.log(budgetCategories)
+    
 
     const handleShowAddBudget = () => {
         setShowAddBudgets(!showAddBudgets)
@@ -182,13 +183,21 @@ const Budget = ({data, setActiveCategory}) => {
 
 
     }
+
+    const handleCloseEditBudget = () => {
+        setShowEditBudget(false)
+        setBudgetCategory('');
+        setMaximumSpending('$');
+        setBudgetTheme('');
+        setError("")
+    }
     
 
    
 
     return (
         <section className=" min-h-screen p-4 bg-[#F8f4f0] overflow-hidden lg:w-full">
-            <div className={`${showAddBudgets ? "bg-black absolute top-0 right-[0.5px] z-20 w-full h-[900px] opacity-70" : ""}`}></div>
+            <div className={`${(showAddBudgets || showEditBudget) ? "fixed inset-0 bg-black opacity-70 z-20" : ""}`}></div>
             <div className="flex flex-row justify-between  w-full">
                 <h1 className="font-bold text-[32px]">Budgets</h1>
 
@@ -313,6 +322,10 @@ const Budget = ({data, setActiveCategory}) => {
                                     onClose={() => setShowDeleteBudget(false)}
                                 />
                             </div>}
+                            {activeEditBudgetId === tx.id && showEditBudget &&
+                            <div className="absolute  right-5 flex flex-col rounded-2xl bg-white w-[310px] h-[470px] z-20 p-2">
+                                 <EditBudgetModal handleCloseEditBudget={handleCloseEditBudget} error={error} budgetCategory={budgetCategory} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} data={data} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} handleEditBudget={handleEditSubmit}/>
+                                 </div>}
                             <p>Maximum of ${tx.maximum} </p>
                             <div className="my-4 bg-[#F8f4f0] p-1.5 rounded-md">
                                 <div style={{ backgroundColor: tx.theme, width: `${tx.spendingPercentage}%`}} className="h-4">
@@ -380,22 +393,15 @@ const Budget = ({data, setActiveCategory}) => {
                 </article>
             </div>
 
-            <div className={`w-80 p-4 ${(showAddBudgets || showEditBudget) ? " absolute bottom-56 xs:bottom-68 xs:right-7 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
+            <div className={`w-80 p-4 ${showAddBudgets ? " absolute bottom-56 xs:bottom-68 xs:right-7 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
                 
-                {showAddBudgets ? 
                 <AddBudgetModal handleShowAddBudget={handleShowAddBudget} error={error} categories={categories} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} budgetCategory={budgetCategory} setBudgetCategory={setBudgetCategory} handleSubmit={handleSubmit} data={data}/> 
 
-                : showEditBudget ?
                 
-                <EditBudgetModal handleShowAddBudget={handleShowAddBudget} error={error} budgetCategory={budgetCategory} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} data={data} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} handleEditBudget={handleEditSubmit}/>
-            
-                : null}
             </div>
             
 
-            
-
-            
+    
 
             
         </section>
