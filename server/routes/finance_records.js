@@ -31,7 +31,7 @@ router.post('/records', async (req, res) => {
             )
         }
 
-        if (data.pota) {
+        if (data.pots) {
             data.pots = data.pots.map(record => 
                 record.id ? record : {...record, id: Date.now() + Math.random()}
             )
@@ -50,8 +50,8 @@ router.post('/records', async (req, res) => {
 
         // Add new record to the appropriate collection
         if (recordType === 'budget'){
-            if (!data.budget) data.budget = []
-            data.budget.push(newRecord)
+            if (!data.budgets) data.budgets = []
+            data.budgets.push(newRecord)
         } else if (recordType === 'pots') {
             if (!data.pots) data.pots = []
             data.pots.push(newRecord)      
@@ -72,48 +72,116 @@ router.post('/records', async (req, res) => {
 })
 
 router.put('/records/:type/:id', async (req, res) => {
-    const filePath = path.join(__dirname, '../data/data.json')
-    const recordId = parseInt(req.params.id)
+    const filePath = path.join(__dirname, '../data/data.json');
+    const recordId = parseFloat(req.params.id);
     const recordType = req.params.type;
+    const { action, amount, ...recordData } = req.body;
 
+    
     try {
-        //read the existing data
-        const rawData = fs.readFile(filePath, 'utf8');
+        // Read the existing data
+        const rawData = await fs.readFile(filePath, 'utf8');
         let data = JSON.parse(rawData);
 
-
-        //validate record type
-        if (recordType !== "budget" && recordType !== "pots") {
-            res.status(400).json({message: "Invalid record type. Use Budgets or Pots."})
+        // Validate record type - fix case consistency
+        if (recordType !== "budgets" && recordType !== "pots") {
+            return res.status(400).json({ message: "Invalid record type. Use 'budgets' or 'pots'." });
         }
 
-        //find the index of the record to update
+        // Find the index of the record to update
         const recordIndex = data[recordType].findIndex(record => record.id === recordId);
-
-        if (recordIndex === -1){
-            return res.status(404).json({message: 'Record not found'})
+        
+        if (recordIndex === -1) {
+            return res.status(404).json({ message: 'Record not found' });
         }
 
-        //update the record
-        data[recordType][recordId] = {
-            ...data[recordType][recordId],
-            ...req.body,
+        const record = data[recordType][recordIndex];
+
+        // Process pot actions (add/withdraw) if applicable
+        if (recordType === 'pots' && action) {
+            // Convert numbers explicitly with parseFloat to ensure consistent behavior
+            let updatedTotal = parseFloat(record.total) || 0;
+            let updatedBalance = parseFloat(data.balance.current) || 0;
+
+            
+
+            const amountNum = parseFloat(amount);
+            
+            if (isNaN(amountNum) || amountNum <= 0) {
+                return res.status(400).json({ message: 'Invalid amount. Must be a positive number.' });
+            }
+
+            if (action === 'add') {
+                // Check if there's enough balance
+                if (updatedBalance < amountNum) {
+                    return res.status(400).json({ message: "Insufficient balance" });
+                }
+                
+                // Update both values
+                updatedBalance = updatedBalance - amountNum;
+                updatedTotal = updatedTotal + amountNum;
+                
+                
+                
+                // Update the record with the new total
+                record.total = updatedTotal
+                
+                // Update the balance in data object
+                data.balance.current = updatedBalance;
+                
+            } else if (action === 'withdraw') {
+                // Check if there's enough in the pot
+                if (updatedTotal < amountNum) {
+                    return res.status(400).json({ message: 'Insufficient funds in pot' });
+                }
+                
+                // Update both values
+                updatedBalance = updatedBalance + amountNum;
+                updatedTotal = updatedTotal - amountNum;
+                
+                console.log(`After calculations: new pot total=${updatedTotal}, new balance=${updatedBalance}`);
+                
+                // Update the record with the new total
+                record.total = updatedTotal;
+                
+                // Update the balance in data object
+                data.balance.current = updatedBalance;
+                
+            } else {
+                return res.status(400).json({ message: 'Invalid action. Use "add" or "withdraw".' });
+            }
+            
+            
+        }
+
+        // Update the record with all other changed data
+        data[recordType][recordIndex] = {
+            ...record,
+            ...recordData,
             date: new Date().toISOString()
         };
 
-        //write updated data back to the file
+        // Write updated data back to the file
         await fs.writeFile(filePath, JSON.stringify(data, null, 2));
 
-        res.json(data[recordType][recordIndex])
-    } catch (err) {
-        console.error("Error updating record:", err)
-        res.status(500).json({ message: "Error updating record", error: err.message})
-    }
-})
+        
 
-router.delete('records/:type/:id', async (req, res) => {
+        
+        res.json({
+            record: data[recordType][recordIndex],
+            balance: data.balance.current
+        });
+        
+    } catch (err) {
+        console.error("Error updating record:", err);
+        res.status(500).json({ message: "Error updating record", error: err.message });
+    }
+});
+
+
+router.delete('/records/:type/:id', async (req, res) => {
     const filePath = path.join(__dirname, '../data/data.json');
-    const recordId = parseInt(req.params.id);
+    const recordId = parseFloat(req.params.id);
     const recordType = req.params.type;
     
     try {
@@ -122,12 +190,13 @@ router.delete('records/:type/:id', async (req, res) => {
           let data = JSON.parse(rawData);
           
           // Validate record type
-          if (recordType !== 'budget' && recordType !== 'pots') {
+          if (recordType !== 'budgets' && recordType !== 'pots') {
               return res.status(400).json({ message: 'Invalid record type. Use "budget" or "pots".' });
           }
           
           // Find the index of the record to delete
           const recordIndex = data[recordType].findIndex(record => record.id === recordId);
+          console.log("index",recordIndex)
           
           // If record not found, return 404
           if (recordIndex === -1) {
