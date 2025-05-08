@@ -62,7 +62,7 @@ const Home = ({data}) => {
                                 />
                                 <div >
                                     <h3 className="text-sm text-gray-500 mb-3">Total Saved</h3>
-                                    <p className="text-3xl font-bold leading-8">${totalSaved.toLocaleString()}</p>
+                                    <p className="text-3xl font-bold leading-8">${totalSaved.toLocaleString(undefined, ({minimumFractionDigits: 2, maximumFractionDigits: 2}))}</p>
 
                                 </div>
 

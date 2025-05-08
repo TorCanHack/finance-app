@@ -1,7 +1,7 @@
 import icon_close from '../assets/images/icon-close-modal.svg'
 import ThemeDropDown from './ThemeDropDown'
 
-const AddBudgetModal = ({handleShowAddBudget, error, categories, maximumSpending, setMaximumSpending, showTheme, setShowTheme, budgetTheme, setBudgetTheme, budgetCategory, setBudgetCategory, handleSubmit, data }) => {
+const AddBudgetModal = ({handleShowAddBudget, error, categories, maximumSpending, setMaximumSpending, showTheme, setShowTheme, budgetTheme, setBudgetTheme, budgetCategory, setBudgetCategory, handleSubmit, data, themeData }) => {
 
 
     return (
@@ -49,8 +49,9 @@ const AddBudgetModal = ({handleShowAddBudget, error, categories, maximumSpending
                     data={data} 
                     showTheme={showTheme} 
                     setShowTheme={setShowTheme}
-                    budgetTheme={budgetTheme}
-                    setBudgetTheme={setBudgetTheme}
+                    colorTheme={budgetTheme}
+                    setColorTheme={setBudgetTheme}
+                    themeData={themeData}
                 />
                 {!showTheme && <button className="bg-gray-900 text-white w-full mt-4 p-3 rounded-xl" onClick={handleSubmit}>Add Budget</button>}
                 

@@ -39,9 +39,19 @@ export const updateRecords = async (type, id, data) => {
     }
 }
 
+export const updatePotTotal = async (potId, action, amount) => {
+    try {
+        const response = await api.put(`/records/pots/${potId}`, {action: action, amount: parseFloat(amount)})
+        console.log("Pot update response:", response.data);
+        return response.data
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to update pot');
+      }
+}
+
 export const deleteRecords = async (type, id) => {
     try {
-        const response = await api.delete(`records/${type}/${id}`)
+        const response = await api.delete(`/records/${type}/${id}`)
         return response.data
     } catch (error) {
         console.error("Error deleting record:", error);

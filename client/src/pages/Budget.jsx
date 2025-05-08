@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ThemeDropDown from "../components/ThemeDropDown";
-import icon_close from '../assets/images/icon-close-modal.svg'
+
 import caret_right from '../assets/images/icon-caret-right.svg'
 import elipsis from '../assets/images/icon-ellipsis.svg'
 import DonutChart from "../components/DonutChart";
@@ -9,9 +9,9 @@ import { useNavigate } from "react-router-dom";
 import AddBudgetModal from "../components/AddBudgetModal";
 import EditBudgetModal from "../components/EditBudgetModal";
 import EditAndDeleteModal from "../components/EditAndDeleteModal";
-import DeleteBudgetModal from "../components/DeleteBudgetModal";
-//edit and delete popup feature missing
-const Budget = ({data, setActiveCategory}) => {
+import DeleteModal from "../components/DeleteModal";
+
+const Budget = ({data, setActiveCategory, showTheme, setShowTheme}) => {
 
 
     const navigate = useNavigate()
@@ -25,7 +25,6 @@ const Budget = ({data, setActiveCategory}) => {
     }, [data.budgets])
 
     const [showAddBudgets, setShowAddBudgets] = useState(false)
-    const [showTheme, setShowTheme] = useState(false)
     const categories = [...new Set(data.transactions?.map(items => items.category))].sort()
     const budgetCategories = budgets.map(tx => tx.category)
     const [maximumSpending, setMaximumSpending] = useState("")
@@ -129,7 +128,7 @@ const Budget = ({data, setActiveCategory}) => {
     
 
     const deleteBudget = async (id) => {
-        try { await deleteRecords('budget', id)
+        try { await deleteRecords('budgets', id)
             setBudgets(prev => prev.filter(budget => budget.id !== id))
             setShowDeleteBudget(false)
         } catch (error) {
@@ -140,15 +139,16 @@ const Budget = ({data, setActiveCategory}) => {
 
     const editBudget = async(id, newBudget) => {
         try {
-            const response = await updateRecords('budgets', id, {
+            await updateRecords('budgets', id, {
                 category: newBudget.budgetCategory,
                 maximum: newBudget.maximum,
                 theme: newBudget.budgetTheme})
 
-            setBudgets( prev => [...prev, response])
+            setBudgets( prev => prev.map( budget => budget.id === id ? {...budget, category: newBudget.budgetCategory, maximum: newBudget.maximum, theme: newBudget.budgetTheme} : budget))
             setBudgetCategory('');
             setMaximumSpending('$');
             setBudgetTheme('');
+            setShowEditBudget(false);
             setError("")
 
         }  catch (error) {
@@ -165,7 +165,8 @@ const Budget = ({data, setActiveCategory}) => {
             return
         }
 
-        if (!budgetCategories.includes(budgetCategory)){
+        const otherBudgetCategory = budgetCategories.filter((_, index ) =>  budgets[index].id !== budgetId)
+        if (!otherBudgetCategory.includes(budgetCategory)){
             setError("Budget does not exists")
             return
         }
@@ -179,7 +180,7 @@ const Budget = ({data, setActiveCategory}) => {
         console.log("budget id", budgetId)
 
         editBudget(budgetId, newBudget);
-        setShowEditBudget(false)
+        
 
 
     }
@@ -310,16 +311,17 @@ const Budget = ({data, setActiveCategory}) => {
                             </div>
                             {activeEditBudgetId === tx.id && 
                             <div className="absolute right-7 z-20 bg-white">
-                                <EditAndDeleteModal onEdit={() => handleShowEditBudget(tx)} onDelete={() => handleShowDeleteBudget()}/>
+                                <EditAndDeleteModal onEdit={() => handleShowEditBudget(tx)} onDelete={() => handleShowDeleteBudget()} text={"Budget"}/>
 
                             </div>
                             }
                             {activeEditBudgetId === tx.id && showDeleteBudget && 
                             <div>
-                                <DeleteBudgetModal  
-                                    budgetCategory={tx.budgetcategory} 
+                                <DeleteModal  
+                                    DisplayName={tx.budgetcategory} 
                                     onDelete={() => deleteBudget(tx.id)}
                                     onClose={() => setShowDeleteBudget(false)}
+                                    DisplayText = {"Are you sure you want to delete this budget? This action cannot be reversed and all the data inside will be removed forever"}
                                 />
                             </div>}
                             {activeEditBudgetId === tx.id && showEditBudget &&
@@ -395,7 +397,7 @@ const Budget = ({data, setActiveCategory}) => {
 
             <div className={`w-80 p-4 ${showAddBudgets ? " absolute bottom-56 xs:bottom-68 xs:right-7 right-5 flex flex-col rounded-2xl bg-white w-1/2 h-[470px] z-20 border border-black" : "hidden"}`}>
                 
-                <AddBudgetModal handleShowAddBudget={handleShowAddBudget} error={error} categories={categories} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} budgetCategory={budgetCategory} setBudgetCategory={setBudgetCategory} handleSubmit={handleSubmit} data={data}/> 
+                <AddBudgetModal handleShowAddBudget={handleShowAddBudget} error={error} categories={categories} maximumSpending={maximumSpending} setMaximumSpending={setMaximumSpending} showTheme={showTheme} setShowTheme={setShowTheme} budgetTheme={budgetTheme} setBudgetTheme={setBudgetTheme} budgetCategory={budgetCategory} setBudgetCategory={setBudgetCategory} handleSubmit={handleSubmit} data={data} themeData={budgets}/> 
 
                 
             </div>

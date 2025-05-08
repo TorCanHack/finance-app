@@ -21,8 +21,8 @@ const DonutChart  = ({data}) => {
                     dataKey="value"
                     cx="50%"
                     cy="50%"
-                    innerRadius={ isMd? 100: 60}
-                    outerRadius={ isMd? 150: 120}
+                    innerRadius={ isMd? 80: 60}
+                    outerRadius={ isMd? 130: 120}
                     fill="blue"
                 >
                     {pieData.map((entry, index) => (

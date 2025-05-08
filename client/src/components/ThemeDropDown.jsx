@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import icon_down from '../assets/images/icon-caret-down.svg'
 
-const ThemeDropDown = ({data, showTheme, setShowTheme, budgetTheme, setBudgetTheme}) => {
+const ThemeDropDown = ({ showTheme, setShowTheme, colorTheme, setColorTheme, themeData}) => {
 
     
 
@@ -18,7 +18,7 @@ const ThemeDropDown = ({data, showTheme, setShowTheme, budgetTheme, setBudgetThe
     }
 
     const [currentTheme, setCurrentTheme] = useState({name: "Green", hex: "#277C78"})
-    const budgets = data.budgets || [];
+    const colors = themeData || [];
 
     const handleShowTheme = () => {
         setShowTheme(!showTheme)
@@ -43,16 +43,16 @@ const ThemeDropDown = ({data, showTheme, setShowTheme, budgetTheme, setBudgetThe
                </div>
                 <ul className={` ${showTheme ? "flex  flex-col bg-white px-4 cursor-pointer rounded-b-2xl" : "hidden"}`} >
                     {Object.entries(theme).map(([colorName, hexCode]) => {
-                        const inUse = budgets.some(budget => budget.theme === hexCode)
+                        const inUse = colors.some(color => color.theme === hexCode)
                         return (
                         <li 
                             key={colorName} 
                             className='flex flex-row items-center border-b border-gray-300 py-2 text-sm' 
-                            value={budgetTheme}
+                            value={colorTheme}
                             onClick={() => {
                                 setCurrentTheme({name: colorName, hex: hexCode});
                                 setShowTheme(false)
-                                setBudgetTheme(hexCode);
+                                setColorTheme(hexCode);
                             }}
                         >
                            

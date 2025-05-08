@@ -6,10 +6,13 @@ import Home from "./pages/Home"
 import Navigation from "./components/Navigation"
 import Transactions from "./pages/Transactions"
 import Budget from "./pages/Budget"
+import Pots from "./pages/Pots"
+import RecurringBills from "./pages/RecurringBills"
 
 function App() {
 
   const [data, setData] = useState({})
+  const [showTheme, setShowTheme] = useState(false)
   const [error, setError] = useState("")
   const [activeCategory, setActiveCategory] = useState('');
   const theme = {
@@ -46,7 +49,9 @@ function App() {
         
           <Route path="/" element={<Home data={data}/>}/>
           <Route path="/transactions" element={<Transactions data={data} activeCategory={activeCategory} setActiveCategory={setActiveCategory} /> }/>
-          <Route path="/budget" element={<Budget data={data} theme={theme} activeCategory={activeCategory} setActiveCategory={setActiveCategory}/>}/>
+          <Route path="/budget" element={<Budget data={data} theme={theme} activeCategory={activeCategory} setActiveCategory={setActiveCategory} showTheme={showTheme} setShowTheme={setShowTheme}/>}/>
+          <Route path="/pots" element={<Pots data={data} showTheme={showTheme} setShowTheme={setShowTheme}/>}/>
+          <Route path="/recurring" element={<RecurringBills data={data}/>}/>
 
         </Routes>
         <Navigation/>
