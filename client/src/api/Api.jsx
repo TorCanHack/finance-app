@@ -3,7 +3,7 @@ import axios from 'axios';
 
 //Create a reusable Axios instance
 const api = axios.create({
-    baseURL: "https://finance-9kew.onrender.com/api",
+    baseURL: "/api",
     headers: {
         "Content-Type": "application/json",
     }
