@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': 'https://finance-9kew.onrender.com/api',  
+      '/api': 'https://finance-9kew.onrender.com',  
     }
   },
   build: {
