@@ -5,8 +5,13 @@ const recordsRouter = require("./routes/finance_records")
 dotenv.config();
 
 const app = express()
+const corsOptions = {
+  origin: "*", // or "*" for all origins
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type"],
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
